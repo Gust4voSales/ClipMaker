@@ -12,12 +12,15 @@ import { useState } from "react";
 import { DurationInput } from "../components/DurationInput";
 import { formatSecondsToTime } from "../utils/SecondsToTimeFormat";
 import Image from "next/image";
+import { ColorInput } from "../components/ColorInput";
 
 export default function Index2() {
   const [video, setVideo] = useState<File | null>(null);
   const [videoDuration, setVideoDuration] = useState(0);
   const [audio, setAudio] = useState<File | null>(null);
   const [audioDuration, setAudioDuration] = useState(0);
+
+  const [colorFilter, setColorFilter] = useState("");
 
   function handleVideoUpload(video: File) {
     setVideo(video);
@@ -124,7 +127,12 @@ export default function Index2() {
 
               <div>
                 <Label>Filtro de cor</Label>
-                <Input type={"color"} style={{ backgroundColor: theme.colors.background }} />
+                <ColorInput
+                  value={colorFilter}
+                  onChangeValue={(value) => {
+                    setColorFilter(value);
+                  }}
+                />
               </div>
             </GroupFields>
 
@@ -152,6 +160,7 @@ const Container = styled.div`
 `;
 const LeftContainer = styled.div`
   border: 2px solid black;
+  user-select: none;
 `;
 const BackgroundInstructionsContainer = styled.div`
   width: 100%;
@@ -163,7 +172,7 @@ const BackgroundInstructionsContainer = styled.div`
 const RightContainer = styled.div`
   background-color: #fff;
 `;
-const Form = styled.form`
+const Form = styled.div`
   display: flex;
   flex-direction: column;
   margin-top: ${(props) => props.theme.spacing(2)};
