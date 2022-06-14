@@ -131,7 +131,8 @@ export function ClipPreview({ videoInput, audioInput, screenPlay }: ClipPreviewP
     if (screenPlay.overlayFilter) {
       videoOverlay = document.createElement("video");
       videoOverlay.setAttribute("id", "video-preview-overlay");
-      videoOverlay.src = "/overlay.mov";
+      videoOverlay.src = "/overlays/old_movie.mp4";
+      // videoOverlay.src = "/overlays/hearts.mp4";
       videoOverlay.volume = 0;
       videoOverlay.loop = true;
       videoOverlay.load();

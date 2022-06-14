@@ -28,17 +28,11 @@ export class ClipMaker {
   constructor(videoInput: File, audioInput: File, screenPlay: ScreenPlay) {
     this.videoInput = videoInput;
     const videoName = videoInput.name;
-    this.videoExtension = videoName.slice(
-      videoName.indexOf("."),
-      videoName.length
-    );
+    this.videoExtension = videoName.slice(videoName.indexOf("."), videoName.length);
 
     this.audioInput = audioInput;
     const audioName = audioInput.name;
-    this.audioExtension = audioName.slice(
-      audioName.indexOf("."),
-      audioName.length
-    );
+    this.audioExtension = audioName.slice(audioName.indexOf("."), audioName.length);
 
     this.screenPlay = screenPlay;
 
@@ -50,11 +44,9 @@ export class ClipMaker {
 
     outputName = await this.addAudio(outputName);
 
-    if (this.screenPlay.overlayFilter)
-      outputName = await this.addOverlayFilter(outputName);
+    if (this.screenPlay.overlayFilter) outputName = await this.addOverlayFilter(outputName);
 
-    if (this.screenPlay.colorFilter)
-      outputName = await this.addColorFilter(outputName);
+    if (this.screenPlay.colorFilter) outputName = await this.addColorFilter(outputName);
 
     this.outputClip = ffmpeg.FS("readFile", outputName);
 
@@ -69,10 +61,7 @@ export class ClipMaker {
     overlayFilter: boolean,
     colorFilter?: string
   ) {
-    const timeline = ClipMaker.generateTimeline(
-      videoDuration,
-      desiredOutputLength
-    );
+    const timeline = ClipMaker.generateTimeline(videoDuration, desiredOutputLength);
 
     const screenPlay: ScreenPlay = {
       timeline,
@@ -84,10 +73,7 @@ export class ClipMaker {
     return screenPlay;
   }
 
-  private static generateTimeline(
-    videoDuration: number,
-    desiredOutputLength: number
-  ) {
+  private static generateTimeline(videoDuration: number, desiredOutputLength: number) {
     let timeline: ({ start: number; duration: number } | string)[] = [];
 
     const clipsLength = { min: 3, max: 5 }; // static for now
@@ -95,8 +81,7 @@ export class ClipMaker {
     let currentVideoDuration = 0;
     while (currentVideoDuration < desiredOutputLength) {
       let randomClipLength = randomInRange(clipsLength.min, clipsLength.max);
-      const diff =
-        desiredOutputLength - (currentVideoDuration + randomClipLength);
+      const diff = desiredOutputLength - (currentVideoDuration + randomClipLength);
       if (diff < 0)
         // random clip extrapolated the time
         randomClipLength += diff;
@@ -162,17 +147,7 @@ export class ClipMaker {
     const outputName = `clips-output${this.videoExtension}`;
 
     ffmpeg.FS("writeFile", "concat_clips.txt", concat_clips_array.join("\n"));
-    await ffmpeg.run(
-      "-f",
-      "concat",
-      "-i",
-      "concat_clips.txt",
-      "-map",
-      "0:0",
-      "-preset",
-      "ultrafast",
-      outputName
-    );
+    await ffmpeg.run("-f", "concat", "-i", "concat_clips.txt", "-map", "0:0", "-preset", "ultrafast", outputName);
 
     return outputName;
   }
@@ -196,10 +171,10 @@ export class ClipMaker {
   }
 
   private async addOverlayFilter(inputName: string) {
-    ffmpeg.FS("writeFile", "overlay.mov", await fetchFile("/overlay.mov"));
+    ffmpeg.FS("writeFile", "hearts.mp4", await fetchFile("/overlays/hearts.mp4"));
 
     const outputName = `filter_output${this.videoExtension}`;
-    let overlayVideoCommand = `-i ${inputName} -stream_loop -1 -i overlay.mov -t ${this.screenPlay.duration} -filter_complex [1][0]scale2ref=h=ow:w=iw[A][B];[A]format=argb,colorchannelmixer=aa=0.3[Btransparent];[B][Btransparent]overlay=(main_w-w):(main_h-h) -pix_fmt yuv420p -preset ultrafast ${outputName}`;
+    let overlayVideoCommand = `-i ${inputName} -stream_loop -1 -i hearts.mp4 -t ${this.screenPlay.duration} -filter_complex [1][0]scale2ref=h=ow:w=iw[A][B];[A]format=argb,colorchannelmixer=aa=0.3[Btransparent];[B][Btransparent]overlay=(main_w-w):(main_h-h) -pix_fmt yuv420p -preset ultrafast ${outputName}`;
     await ffmpeg.run(...overlayVideoCommand.split(" "));
 
     return outputName;
@@ -208,8 +183,8 @@ export class ClipMaker {
   private async addColorFilter(inputName: string) {
     const outputName = `color_filter_output${this.videoExtension}`;
 
-    const colorFilterCommand = `-i ${inputName} -preset ultrafast -vf setsar=1,drawbox=t=fill:c=${this
-      .screenPlay.colorFilter!}@0.05 ${outputName}`;
+    const colorFilterCommand = `-i ${inputName} -preset ultrafast -vf setsar=1,drawbox=t=fill:c=${this.screenPlay
+      .colorFilter!}@0.05 ${outputName}`;
     await ffmpeg.run(...colorFilterCommand.split(" "));
 
     return outputName;
