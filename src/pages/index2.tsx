@@ -13,6 +13,7 @@ import { DurationInput } from "../components/DurationInput";
 import { formatSecondsToTime } from "../utils/SecondsToTimeFormat";
 import Image from "next/image";
 import { ColorInput } from "../components/ColorInput";
+import { OverlayInput } from "../components/OverlayInput";
 
 export default function Index2() {
   const [video, setVideo] = useState<File | null>(null);
@@ -122,7 +123,7 @@ export default function Index2() {
 
               <div>
                 <Label>Filtro</Label>
-                <Input style={{ backgroundColor: theme.colors.background }} />
+                <OverlayInput />
               </div>
 
               <div>
