@@ -1,10 +1,14 @@
 import { Check, X } from "phosphor-react";
-import { MouseEvent, useState } from "react";
+import { MouseEvent, useEffect, useState } from "react";
 import { Popover } from "react-tiny-popover";
 import styled from "styled-components";
 import { OVERLAYS } from "../../utils/Overlays";
 
-export function OverlayInput() {
+interface OverlayInputProps {
+  // opacity: 0.7;
+  disabled: boolean;
+}
+export function OverlayInput({ disabled }: OverlayInputProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedOverlayId, setSelectedOverlayId] = useState<string | null>(null);
 
@@ -46,7 +50,7 @@ export function OverlayInput() {
         </Container>
       )}
     >
-      <OpenButton onClick={() => setIsOpen(true)}>
+      <OpenButton disabled={disabled} onClick={() => setIsOpen(true)}>
         {selectedOverlayId ? OVERLAYS[Number(selectedOverlayId) - 1].name : "Selecionar filtro"}
         {selectedOverlayId && (
           <RemoveOverlayButton onClick={removeOverlay}>

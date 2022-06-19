@@ -73,10 +73,12 @@ export default function Index2() {
               onUpload={!video ? handleVideoUpload : handleAudioUpload}
             />
           ) : (
-            <BackgroundInstructionsContainer>
-              <Image src={instructionsBG} layout="fixed" />
-              <span>Depois adicionar instruções do que fazer (além de estilização) </span>
-            </BackgroundInstructionsContainer>
+            <InstructionsContainer>
+              <div>
+                <Image src={instructionsBG} objectFit="contain" layout="responsive" />
+              </div>
+              <span>Altere as configurações ao lado como desejar</span>
+            </InstructionsContainer>
           )}
         </LeftContainer>
         <RightContainer>
@@ -123,7 +125,7 @@ export default function Index2() {
 
               <div>
                 <Label>Filtro</Label>
-                <OverlayInput />
+                <OverlayInput disabled={!videoDuration || !audioDuration} />
               </div>
 
               <div>
@@ -150,6 +152,7 @@ export default function Index2() {
 const Title = styled.h1``;
 const Container = styled.div`
   display: flex;
+  justify-content: space-between;
   column-gap: ${(props) => props.theme.spacing(2)};
   margin-top: ${(props) => props.theme.spacing(2)};
   & > div:first-child,
@@ -162,16 +165,27 @@ const Container = styled.div`
 const LeftContainer = styled.div`
   border: 2px solid black;
   user-select: none;
+  width: 49%;
 `;
-const BackgroundInstructionsContainer = styled.div`
-  width: 100%;
-  height: 50%;
+const InstructionsContainer = styled.div`
   display: flex;
+  width: 100%;
+  height: 100%;
   align-items: center;
+  justify-content: center;
   flex-direction: column;
+  row-gap: ${(props) => props.theme.spacing(4)};
+  font-weight: 500;
+  color: ${(props) => props.theme.colors.primary};
+  & > div {
+    width: 50%;
+    height: 50%;
+  }
 `;
+
 const RightContainer = styled.div`
   background-color: #fff;
+  width: 49%;
 `;
 const Form = styled.div`
   display: flex;
