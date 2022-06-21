@@ -13,6 +13,7 @@ import Image from "next/image";
 import { ColorInput } from "../components/ColorInput";
 import { OverlayInput } from "../components/OverlayInput";
 import { useClip } from "../hooks/useClip";
+import { DisableableComponent } from "../styles/DisableableComponent";
 
 export default function Index2() {
   const {
@@ -81,9 +82,9 @@ export default function Index2() {
             </FileInputContainer>
 
             <Label>Audio</Label>
-            <FileInputContainer style={!videoInput ? { opacity: 0.6 } : {}}>
+            <FileInputContainer disabled={!audioInput}>
               <IconStatus>{audioInput ? <Check weight="bold" /> : "?"}</IconStatus>
-              <FileInfoContainer>
+              <FileInfoContainer disabled={!audioInput}>
                 <FileTitle>{audioInput ? audioInput.name : "Faça upload de um arquivo de audio ao lado"}</FileTitle>
                 <FileInfo>{audioInputDuration ? parseSecondsToTime(audioInputDuration) : "00:00:00"}</FileInfo>
               </FileInfoContainer>
@@ -168,9 +169,10 @@ const Label = styled.label`
   font-size: 1.8rem;
   font-weight: 500;
 `;
-const FileInputContainer = styled.div`
+const FileInputContainer = styled.div<DisableableComponent>`
   display: flex;
-  background-color: ${(props) => props.theme.colors.background};
+  background-color: ${({ disabled, theme }) => (disabled ? theme.colors.disabledBG : theme.colors.background)};
+  opacity: ${({ disabled, theme }) => (disabled ? theme.disabledOpacity : 1)};
   align-items: center;
   padding: ${(props) => props.theme.spacing(2)};
   height: 8rem;
@@ -192,12 +194,13 @@ const IconStatus = styled.span`
     height: 2.4rem;
   }
 `;
-const FileInfoContainer = styled.div`
+const FileInfoContainer = styled.div<DisableableComponent>`
   height: 100%;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  color: ${(props) => props.theme.colors.primary};
+
+  color: ${({ disabled, theme }) => (disabled ? theme.colors.disabledColor : theme.colors.primary)};
 `;
 const FileTitle = styled.h4`
   font-weight: 500;
