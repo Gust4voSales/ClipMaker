@@ -1,10 +1,7 @@
 import { ButtonHTMLAttributes } from "react";
 import styled from "styled-components";
 
-export function Button({
-  children,
-  ...rest
-}: ButtonHTMLAttributes<HTMLButtonElement>) {
+export function Button({ children, ...rest }: ButtonHTMLAttributes<HTMLButtonElement>) {
   return <ButtonComponent {...rest}>{children}</ButtonComponent>;
 }
 
@@ -22,4 +19,8 @@ const ButtonComponent = styled.button`
   font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.1rem;
+
+  &:disabled {
+    opacity: 0.95;
+  }
 `;

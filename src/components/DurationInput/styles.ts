@@ -55,7 +55,6 @@ export const DurationRange = styled.input`
   &:disabled {
     &::-webkit-slider-thumb {
       cursor: default;
-      opacity: 0.7;
     }
   }
 `;

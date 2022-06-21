@@ -1,28 +1,24 @@
 import { Check, X } from "phosphor-react";
-import { MouseEvent, useEffect, useState } from "react";
+import { useState } from "react";
 import { Popover } from "react-tiny-popover";
 import styled from "styled-components";
+import { useClip } from "../../hooks/useClip";
 import { OVERLAYS } from "../../utils/Overlays";
 
-interface OverlayInputProps {
-  // opacity: 0.7;
-  disabled: boolean;
-}
-export function OverlayInput({ disabled }: OverlayInputProps) {
+export function OverlayInput() {
+  const { overlayFilterId, setOverlayFilterId, areInputsDisabled } = useClip();
+
   const [isOpen, setIsOpen] = useState(false);
-  const [selectedOverlayId, setSelectedOverlayId] = useState<string | null>(null);
 
   function toggleOverlaySelection(id: string) {
-    if (selectedOverlayId === id) {
-      setSelectedOverlayId(null);
+    if (overlayFilterId === id) {
+      setOverlayFilterId(null);
     } else {
-      setSelectedOverlayId(id);
+      setOverlayFilterId(id);
     }
   }
-
-  function removeOverlay(e: MouseEvent<HTMLButtonElement>) {
-    e.stopPropagation();
-    setSelectedOverlayId(null);
+  function removeOverlay() {
+    setOverlayFilterId(null);
   }
 
   return (
@@ -39,23 +35,17 @@ export function OverlayInput({ disabled }: OverlayInputProps) {
               <SelectOverlay onClick={() => toggleOverlaySelection(overlay.id)}>
                 <Video src={overlay.url} autoPlay muted loop />
 
-                {overlay.id === selectedOverlayId ? (
-                  <X weight="bold" style={{ opacity: 1 }} />
-                ) : (
-                  <Check weight="bold" />
-                )}
+                {overlay.id === overlayFilterId ? <X weight="bold" style={{ opacity: 1 }} /> : <Check weight="bold" />}
               </SelectOverlay>
             </OverlayContainer>
           ))}
         </Container>
       )}
     >
-      <OpenButton disabled={disabled} onClick={() => setIsOpen(true)}>
-        {selectedOverlayId ? OVERLAYS[Number(selectedOverlayId) - 1].name : "Selecionar filtro"}
-        {selectedOverlayId && (
-          <RemoveOverlayButton onClick={removeOverlay}>
-            <X weight="bold" />
-          </RemoveOverlayButton>
+      <OpenButton disabled={areInputsDisabled()} onClick={() => setIsOpen(true)}>
+        {overlayFilterId ? OVERLAYS[Number(overlayFilterId) - 1].name : "Selecionar filtro"}
+        {overlayFilterId && (
+          <RemoveOverlay weight="bold" onClickCapture={areInputsDisabled() ? () => {} : removeOverlay} />
         )}
       </OpenButton>
     </Popover>
@@ -118,14 +108,9 @@ const Video = styled.video`
   width: auto;
   background-color: ${(props) => props.theme.colors.background};
 `;
-const RemoveOverlayButton = styled.button`
-  background: none;
+const RemoveOverlay = styled(X)`
   margin-left: auto;
-  border: none;
-  display: flex;
-  & svg {
-    color: ${(props) => props.theme.colors.error};
-    width: 1.6rem;
-    height: 1.6rem;
-  }
+  color: ${(props) => props.theme.colors.error};
+  width: 1.6rem;
+  height: 1.6rem;
 `;

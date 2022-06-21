@@ -1,56 +1,37 @@
 import styled from "styled-components";
 import { Check, X } from "phosphor-react";
 import theme from "../styles/theme";
-import { Input } from "../components/Input";
 import { Button } from "../components/Button";
 import { Dropfile } from "../components/Dropfile";
 import uploadVideoBG from "../assets/media-player-boy.svg";
 import uploadAudioBG from "../assets/girl-listening.svg";
 import instructionsBG from "../assets/instructions.svg";
 import { audioExtensions, videoExtensions } from "../utils/AcceptedFileExtensions";
-import { useState } from "react";
 import { DurationInput } from "../components/DurationInput";
 import { formatSecondsToTime } from "../utils/SecondsToTimeFormat";
 import Image from "next/image";
 import { ColorInput } from "../components/ColorInput";
 import { OverlayInput } from "../components/OverlayInput";
+import { useClip } from "../hooks/useClip";
 
 export default function Index2() {
-  const [video, setVideo] = useState<File | null>(null);
-  const [videoDuration, setVideoDuration] = useState(0);
-  const [audio, setAudio] = useState<File | null>(null);
-  const [audioDuration, setAudioDuration] = useState(0);
-
-  const [colorFilter, setColorFilter] = useState("");
+  const {
+    generateClip,
+    videoInput,
+    setVideoInput,
+    audioInput,
+    setAudioInput,
+    videoInputDuration,
+    audioInputDuration,
+    areInputsDisabled,
+  } = useClip();
 
   function handleVideoUpload(video: File) {
-    setVideo(video);
-
-    const videoEl = document.createElement("video");
-    videoEl.setAttribute("id", "video-input");
-    videoEl.setAttribute("src", URL.createObjectURL(video));
-    videoEl.ondurationchange = () => {
-      setVideoDuration(Math.round(videoEl.duration));
-    };
-  }
-  function handleRemoveVideo() {
-    setVideo(null);
-    setVideoDuration(0);
+    setVideoInput(video);
   }
 
   function handleAudioUpload(audio: File) {
-    setAudio(audio);
-
-    const audioEl = document.createElement("audio");
-    audioEl.setAttribute("id", "audio-input");
-    audioEl.setAttribute("src", URL.createObjectURL(audio));
-    audioEl.ondurationchange = () => {
-      setAudioDuration(Math.round(audioEl.duration));
-    };
-  }
-  function handleRemoveAudio() {
-    setAudio(null);
-    setAudioDuration(0);
+    setAudioInput(audio);
   }
 
   function parseSecondsToTime(totalSeconds: number) {
@@ -65,12 +46,12 @@ export default function Index2() {
       <Title>Criar clipe</Title>
       <Container>
         <LeftContainer>
-          {!video || !audio ? (
+          {!videoInput || !audioInput ? (
             <Dropfile
-              acceptedExtensions={!video ? videoExtensions : audioExtensions}
-              backgroundImg={!video ? uploadVideoBG : uploadAudioBG}
-              dropfileDragMessage={`Arraste o arquivo de ${!video ? "vídeo" : "audio"}`}
-              onUpload={!video ? handleVideoUpload : handleAudioUpload}
+              acceptedExtensions={!videoInput ? videoExtensions : audioExtensions}
+              backgroundImg={!videoInput ? uploadVideoBG : uploadAudioBG}
+              dropfileDragMessage={`Arraste o arquivo de ${!videoInput ? "vídeo" : "audio"}`}
+              onUpload={!videoInput ? handleVideoUpload : handleAudioUpload}
             />
           ) : (
             <InstructionsContainer>
@@ -87,27 +68,27 @@ export default function Index2() {
           <Form>
             <Label>Vídeo</Label>
             <FileInputContainer style={{ marginBottom: theme.spacing(2) }}>
-              <IconStatus>{video ? <Check weight="bold" /> : "?"}</IconStatus>
+              <IconStatus>{videoInput ? <Check weight="bold" /> : "?"}</IconStatus>
               <FileInfoContainer>
-                <FileTitle>{video ? video.name : "Faça upload de um arquivo de vídeo ao lado"}</FileTitle>
-                <FileInfo>{videoDuration ? parseSecondsToTime(videoDuration) : "00:00:00"}</FileInfo>
+                <FileTitle>{videoInput ? videoInput.name : "Faça upload de um arquivo de vídeo ao lado"}</FileTitle>
+                <FileInfo>{videoInputDuration ? parseSecondsToTime(videoInputDuration) : "00:00:00"}</FileInfo>
               </FileInfoContainer>
-              {video && (
-                <RemoveFileButton onClick={handleRemoveVideo} type="button">
+              {videoInput && (
+                <RemoveFileButton onClick={() => setVideoInput(null)}>
                   <X weight="bold" />
                 </RemoveFileButton>
               )}
             </FileInputContainer>
 
             <Label>Audio</Label>
-            <FileInputContainer style={!video ? { opacity: 0.6 } : {}}>
-              <IconStatus>{audio ? <Check weight="bold" /> : "?"}</IconStatus>
+            <FileInputContainer style={!videoInput ? { opacity: 0.6 } : {}}>
+              <IconStatus>{audioInput ? <Check weight="bold" /> : "?"}</IconStatus>
               <FileInfoContainer>
-                <FileTitle>{audio ? audio.name : "Faça upload de um arquivo de audio ao lado"}</FileTitle>
-                <FileInfo>{audioDuration ? parseSecondsToTime(audioDuration) : "00:00:00"}</FileInfo>
+                <FileTitle>{audioInput ? audioInput.name : "Faça upload de um arquivo de audio ao lado"}</FileTitle>
+                <FileInfo>{audioInputDuration ? parseSecondsToTime(audioInputDuration) : "00:00:00"}</FileInfo>
               </FileInfoContainer>
-              {audio && (
-                <RemoveFileButton onClick={handleRemoveAudio} type="button">
+              {audioInput && (
+                <RemoveFileButton onClick={() => setAudioInput(null)}>
                   <X weight="bold" />
                 </RemoveFileButton>
               )}
@@ -116,30 +97,21 @@ export default function Index2() {
             <GroupFields>
               <div>
                 <Label>Duração</Label>
-                <DurationInput
-                  disabled={!videoDuration || !audioDuration}
-                  min={1}
-                  max={!videoDuration || !audioDuration ? 1 : videoDuration}
-                />
+                <DurationInput />
               </div>
 
               <div>
                 <Label>Filtro</Label>
-                <OverlayInput disabled={!videoDuration || !audioDuration} />
+                <OverlayInput />
               </div>
 
               <div>
                 <Label>Filtro de cor</Label>
-                <ColorInput
-                  value={colorFilter}
-                  onChangeValue={(value) => {
-                    setColorFilter(value);
-                  }}
-                />
+                <ColorInput />
               </div>
             </GroupFields>
 
-            <SubmitButton type="submit" disabled>
+            <SubmitButton onClick={generateClip} disabled={areInputsDisabled()}>
               Gerar Clipe
             </SubmitButton>
           </Form>

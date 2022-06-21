@@ -1,19 +1,22 @@
 import { X } from "phosphor-react";
 import styled from "styled-components";
-import { Button } from "../Button";
+import { useClip } from "../../hooks/useClip";
 import { Input } from "../Input";
 
-interface ColorInputProps {
-  value: string;
-  onChangeValue: (c: string) => void;
-}
-export function ColorInput({ value, onChangeValue }: ColorInputProps) {
+export function ColorInput() {
+  const { colorFilter, setColorFilter, areInputsDisabled } = useClip();
+
   return (
     <Container>
-      <ColorInputStyled type="color" value={value} onChange={(e) => onChangeValue(e.target.value)} />
-      <CurrentValue>{value}</CurrentValue>
-      {value != "" && (
-        <RemoveColorBtn onClick={() => onChangeValue("")}>
+      <ColorInputStyled
+        type="color"
+        value={colorFilter ? colorFilter : "#000000"}
+        onChange={(e) => setColorFilter(e.target.value)}
+        disabled={areInputsDisabled()}
+      />
+      <CurrentValue>{colorFilter}</CurrentValue>
+      {colorFilter && (
+        <RemoveColorBtn disabled={areInputsDisabled()} onClick={() => setColorFilter(null)}>
           <X weight="bold" />
         </RemoveColorBtn>
       )}

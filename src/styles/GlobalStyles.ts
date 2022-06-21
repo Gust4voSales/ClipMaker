@@ -15,6 +15,7 @@ export const GlobalTheme = createGlobalStyle`
     font-family: 'Roboto', sans-serif;
 
     &:disabled {
+      opacity: 0.75;
       cursor: default;
       &:hover{ 
         filter: none;

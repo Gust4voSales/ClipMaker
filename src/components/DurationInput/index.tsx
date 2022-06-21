@@ -1,25 +1,35 @@
 import { useEffect, useState } from "react";
+import { useClip } from "../../hooks/useClip";
 import { formatSecondsToTime } from "../../utils/SecondsToTimeFormat";
 import * as S from "./styles";
 
-interface DurationInputProps {
-  disabled: boolean;
-  min: number;
-  max: number;
-}
-export function DurationInput({ disabled, min, max }: DurationInputProps) {
-  const [duration, setDuration] = useState(0);
+export function DurationInput() {
+  const { videoInputDuration, areInputsDisabled, clipDuration, setClipDuration } = useClip();
+
+  const [max, setMax] = useState(1);
+
+  // useEffect(() => {
+  //   // if video and audio are set, then display clipDuration and set max range to the clipDuration
+  //   if (!areInputsDisabled()) {
+  //     setMax(videoInputDuration);
+  //   } else {
+  //     // otherwise set max 1 and clipDuration to 0 (the range input is displayed properly as disabled)
+  //     setMax(1);
+  //   }
+  // }, [areInputsDisabled]);
 
   useEffect(() => {
-    if (max > 1) {
-      setDuration(Math.floor(max / 2));
+    if (videoInputDuration) {
+      setMax(videoInputDuration);
+      setClipDuration(Math.floor(videoInputDuration / 2));
     } else {
-      setDuration(0);
+      setMax(1);
+      setClipDuration(0);
     }
-  }, [max]);
+  }, [videoInputDuration]);
 
   function parseSecondsToTime() {
-    const timeObj = formatSecondsToTime(duration);
+    const timeObj = formatSecondsToTime(clipDuration);
 
     let timeStr = "";
     if (timeObj.hours > 0) {
@@ -37,18 +47,18 @@ export function DurationInput({ disabled, min, max }: DurationInputProps) {
   return (
     <S.Container>
       <S.DurationRange
-        value={duration}
+        value={clipDuration}
         onChange={(e) => {
-          setDuration(Number(e.target.value));
+          setClipDuration(Number(e.target.value));
         }}
-        disabled={disabled}
+        disabled={areInputsDisabled()}
         type="range"
-        min={min}
+        min={1}
         max={max}
-        style={{ backgroundSize: `${(duration * 100) / max}% 100%` }}
+        style={{ backgroundSize: `${(clipDuration * 100) / max}% 100%` }}
       />
-      <S.SelectedDuration style={disabled ? { opacity: 0.7 } : {}}>
-        {duration > 0 ? parseSecondsToTime() : 0}
+      <S.SelectedDuration style={areInputsDisabled() ? { opacity: 0.7 } : {}}>
+        {clipDuration > 0 ? parseSecondsToTime() : 0}
       </S.SelectedDuration>
     </S.Container>
   );
