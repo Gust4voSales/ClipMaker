@@ -1,37 +1,42 @@
 import { X } from "phosphor-react";
 import styled from "styled-components";
 import { useClip } from "../../hooks/useClip";
+import { DisableableComponent } from "../../styles/DisableableComponent";
 import { Input } from "../Input";
 
 export function ColorInput() {
   const { colorFilter, setColorFilter, areInputsDisabled } = useClip();
 
   return (
-    <Container>
+    <Container disabled={areInputsDisabled()}>
       <ColorInputStyled
         type="color"
         value={colorFilter ? colorFilter : "#000000"}
         onChange={(e) => setColorFilter(e.target.value)}
         disabled={areInputsDisabled()}
       />
-      <CurrentValue>{colorFilter}</CurrentValue>
+      <CurrentValue style={areInputsDisabled() ? { opacity: 0.75 } : {}}>{colorFilter}</CurrentValue>
       {colorFilter && (
-        <RemoveColorBtn disabled={areInputsDisabled()} onClick={() => setColorFilter(null)}>
-          <X weight="bold" />
-        </RemoveColorBtn>
+        <RemoveColor
+          weight="bold"
+          onClickCapture={areInputsDisabled() ? () => {} : () => setColorFilter(null)}
+          style={areInputsDisabled() ? { cursor: "default" } : {}}
+        />
       )}
     </Container>
   );
 }
 
-const Container = styled.div`
-  background-color: ${(props) => props.theme.colors.background};
+const Container = styled.div<DisableableComponent>`
+  background-color: ${({ disabled, theme }) => (disabled ? theme.colors.disabledBG : theme.colors.background)};
+  opacity: ${({ disabled, theme }) => (disabled ? theme.disabledOpacity : 1)};
   width: 12rem;
-  height: 3.4rem;
+  height: 3.2rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 0 ${(props) => props.theme.spacing(0.5)};
+  border-radius: ${(props) => props.theme.spacing(0.5)};
 `;
 const ColorInputStyled = styled(Input)`
   -webkit-appearance: none;
@@ -56,15 +61,10 @@ const CurrentValue = styled.span`
   margin-left: ${(props) => props.theme.spacing(0.5)};
 `;
 
-const RemoveColorBtn = styled.button`
+const RemoveColor = styled(X)`
   margin-left: auto;
-  border: none;
-  background: none;
   color: ${(props) => props.theme.colors.error};
-  display: flex;
-  align-items: center;
-  & svg {
-    width: 1.8rem;
-    height: 1.8rem;
-  }
+  cursor: pointer;
+  width: 1.8rem;
+  height: 1.8rem;
 `;

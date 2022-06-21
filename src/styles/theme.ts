@@ -1,8 +1,6 @@
-import { DefaultTheme } from "styled-components";
-
 const SPACE = 8;
 
-const theme: DefaultTheme = {
+const theme = {
   colors: {
     primary: "#586F7C",
     secondary: "#2D1E2F",
@@ -13,8 +11,10 @@ const theme: DefaultTheme = {
 
     success: "green",
     error: "#E3170A",
-    disabled: "gray",
+    disabledColor: "#666666",
+    disabledBG: "#CCCCCC",
   },
+  disabledOpacity: 0.75,
   spacing: (multiplier = 1) => `${(SPACE * multiplier) / 10}rem`,
 };
 
