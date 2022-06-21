@@ -1,4 +1,6 @@
 import { createFFmpeg, fetchFile } from "@ffmpeg/ffmpeg";
+import { getFileExtension } from "./FileExtension";
+import { OVERLAYS } from "./Overlays";
 import { randomInRange } from "./Random";
 
 const ffmpeg = createFFmpeg({
@@ -10,10 +12,10 @@ export const loadFFMPEG = async () => {
   if (!ffmpeg.isLoaded()) await ffmpeg.load();
 };
 
-interface ClipLength {
-  min: number;
-  max: number;
-}
+// interface ClipLength {
+//   min: number;
+//   max: number;
+// }
 export class ClipMaker {
   videoInput: File;
   videoExtension: string;
@@ -25,47 +27,40 @@ export class ClipMaker {
 
   outputClip: Uint8Array | null;
 
+  // TO-DO: ADAPT TO THE NEW SCREENPLAY FORMAT WHERE THE INPUTS ARE PASSED
   constructor(videoInput: File, audioInput: File, screenPlay: ScreenPlay) {
     this.videoInput = videoInput;
     const videoName = videoInput.name;
-    this.videoExtension = videoName.slice(videoName.indexOf("."), videoName.length);
+    this.videoExtension = getFileExtension(videoName);
 
     this.audioInput = audioInput;
     const audioName = audioInput.name;
-    this.audioExtension = audioName.slice(audioName.indexOf("."), audioName.length);
+    this.audioExtension = getFileExtension(audioName);
 
     this.screenPlay = screenPlay;
 
     this.outputClip = null;
   }
 
-  async getVideoClip() {
-    let outputName = await this.cutClips();
-
-    outputName = await this.addAudio(outputName);
-
-    if (this.screenPlay.overlayFilter) outputName = await this.addOverlayFilter(outputName);
-
-    if (this.screenPlay.colorFilter) outputName = await this.addColorFilter(outputName);
-
-    this.outputClip = ffmpeg.FS("readFile", outputName);
-
-    return this.outputClip;
-  }
-
   /* This function returns an object with an array with the timeline (clips starting point and durations + black 
     transitions) it also returns information whether it uses overlays, color filter etc or not */
   public static generateClipScreenPlay(
-    videoDuration: number,
-    desiredOutputLength: number,
-    overlayFilter: boolean,
-    colorFilter?: string
+    videoInput: MediaInput,
+    audioInput: MediaInput,
+    duration: number,
+    overlayFilterID: string | null,
+    colorFilter: string | null
   ) {
-    const timeline = ClipMaker.generateTimeline(videoDuration, desiredOutputLength);
+    const timeline = ClipMaker.generateTimeline(videoInput.duration, duration);
+
+    let overlayFilter: string | null = null;
+    if (overlayFilterID) overlayFilter = OVERLAYS.find((o) => o.id === overlayFilterID)!.url;
 
     const screenPlay: ScreenPlay = {
+      videoInput,
+      audioInput,
       timeline,
-      duration: desiredOutputLength,
+      duration: duration,
       overlayFilter,
       colorFilter,
     };
@@ -101,6 +96,20 @@ export class ClipMaker {
     }
 
     return timeline;
+  }
+
+  async getVideoClip() {
+    let outputName = await this.cutClips();
+
+    outputName = await this.addAudio(outputName);
+
+    if (this.screenPlay.overlayFilter) outputName = await this.addOverlayFilter(outputName);
+
+    if (this.screenPlay.colorFilter) outputName = await this.addColorFilter(outputName);
+
+    this.outputClip = ffmpeg.FS("readFile", outputName);
+
+    return this.outputClip;
   }
 
   private async cutClips() {
@@ -171,7 +180,12 @@ export class ClipMaker {
   }
 
   private async addOverlayFilter(inputName: string) {
-    ffmpeg.FS("writeFile", "hearts.mp4", await fetchFile("/overlays/hearts.mp4"));
+    // ffmpeg.FS("writeFile", "hearts.mp4", await fetchFile("/overlays/hearts.mp4"));
+    ffmpeg.FS(
+      "writeFile",
+      this.screenPlay.overlayFilter!.replace(".", ""),
+      await fetchFile(this.screenPlay.overlayFilter!)
+    );
 
     const outputName = `filter_output${this.videoExtension}`;
     let overlayVideoCommand = `-i ${inputName} -stream_loop -1 -i hearts.mp4 -t ${this.screenPlay.duration} -filter_complex [1][0]scale2ref=h=ow:w=iw[A][B];[A]format=argb,colorchannelmixer=aa=0.3[Btransparent];[B][Btransparent]overlay=(main_w-w):(main_h-h) -pix_fmt yuv420p -preset ultrafast ${outputName}`;

@@ -2,8 +2,6 @@ import hexToRgba from "hex-to-rgba";
 import { useEffect, useRef, useState } from "react";
 
 interface ClipPreviewProps {
-  videoInput: File;
-  audioInput: File;
   screenPlay: ScreenPlay;
 }
 
@@ -14,14 +12,14 @@ enum VIDEO_STATES {
 }
 
 let timeoutTickingFrameRef: NodeJS.Timeout | null = null;
-export function ClipPreview({ videoInput, audioInput, screenPlay }: ClipPreviewProps) {
+export function ClipPreview({ screenPlay }: ClipPreviewProps) {
   const FRAME_RATE = 33.3; // TO DO: Get frame rate from the input video instead of using hardcoded 33.3
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [canvas, setCanvas] = useState<HTMLCanvasElement>();
 
   const [video, setVideo] = useState<HTMLVideoElement>();
-  const [videoOverlay, setVideoOverlay] = useState<HTMLVideoElement>();
   const [audio, setAudio] = useState<HTMLAudioElement>();
+  const [videoOverlay, setVideoOverlay] = useState<HTMLVideoElement>();
 
   const [frames, setFrames] = useState<number[]>([]);
   const [videoState, setVideoState] = useState(VIDEO_STATES.PAUSED);
@@ -32,7 +30,7 @@ export function ClipPreview({ videoInput, audioInput, screenPlay }: ClipPreviewP
     setCanvas(canvasRef.current!);
   }, [canvasRef.current]);
 
-  // when canvas reference has loaded then iniatialize all medias
+  // when canvas reference has loaded then initialize all medias
   useEffect(() => {
     if (!canvas) return;
 
@@ -40,7 +38,8 @@ export function ClipPreview({ videoInput, audioInput, screenPlay }: ClipPreviewP
     setVideo(initializedMedia.video);
     setAudio(initializedMedia.audio);
     setVideoOverlay(initializedMedia.videoOverlay);
-  }, [canvas, videoInput, audioInput, screenPlay]);
+  }, [canvas, screenPlay]);
+
   // once video has been referenced then set the frames
   useEffect(() => {
     if (!video) return;
@@ -48,8 +47,9 @@ export function ClipPreview({ videoInput, audioInput, screenPlay }: ClipPreviewP
     setFrames(parseTimeLineToFramesArray());
   }, [video]);
 
+  // HANDLE VIDEO STATES CHANGES
   useEffect(() => {
-    if (!video || !audio || !(screenPlay.overlayFilter && videoOverlay)) return;
+    if (!video || !audio || (screenPlay.overlayFilter && !videoOverlay)) return;
 
     if (timeoutTickingFrameRef)
       // clear process video recursive call that are pending if it exists
@@ -90,10 +90,7 @@ export function ClipPreview({ videoInput, audioInput, screenPlay }: ClipPreviewP
         }
       }
     });
-
-    console.log(screenPlay.timeline);
-    console.log(framesArray);
-
+    // console.log(framesArray);
     return framesArray;
   }
 
@@ -103,35 +100,45 @@ export function ClipPreview({ videoInput, audioInput, screenPlay }: ClipPreviewP
     if (timeoutTickingFrameRef) clearTimeout(timeoutTickingFrameRef);
 
     // destroy previous medias elements
+    const container = document.getElementById("preview-container");
+
     const videoEl = document.getElementById("video-preview-input");
     const audioEl = document.getElementById("audio-preview-input");
     const videoOverlayEl = document.getElementById("video-preview-overlay");
+
     if (videoEl && audioEl) {
-      videoEl.parentNode?.removeChild(videoEl);
-      audioEl.parentNode?.removeChild(audioEl);
+      container?.removeChild(videoEl);
+      container?.removeChild(audioEl);
     }
-    if (videoOverlayEl) videoOverlayEl.parentNode?.removeChild(videoOverlayEl);
+    if (videoOverlayEl) container?.removeChild(videoOverlayEl);
   }
 
   function initializeVideoAndAudio() {
     resetPreview(); // remove/reset old preview stuff
 
+    const container = document.getElementById("preview-container");
     const video = document.createElement("video");
+    container?.appendChild(video);
     video.setAttribute("id", "video-preview-input");
-    video.src = URL.createObjectURL(videoInput);
+    video.src = URL.createObjectURL(screenPlay.videoInput.media);
+    video.style.display = "none";
     video.load();
 
     const audio = document.createElement("audio");
+    container?.appendChild(audio);
     audio.setAttribute("id", "audio-preview-input");
-    audio.src = URL.createObjectURL(audioInput);
+    audio.src = URL.createObjectURL(screenPlay.audioInput.media);
+    audio.style.display = "none";
     audio.loop = true;
     audio.load();
 
     let videoOverlay: HTMLVideoElement | undefined;
     if (screenPlay.overlayFilter) {
       videoOverlay = document.createElement("video");
+      container?.appendChild(videoOverlay);
       videoOverlay.setAttribute("id", "video-preview-overlay");
-      videoOverlay.src = "/overlays/old_movie.mp4";
+      videoOverlay.src = screenPlay.overlayFilter;
+      videoOverlay.style.display = "none";
       videoOverlay.volume = 0;
       videoOverlay.loop = true;
       videoOverlay.load();
@@ -230,7 +237,7 @@ export function ClipPreview({ videoInput, audioInput, screenPlay }: ClipPreviewP
   }
 
   return (
-    <div id="cont">
+    <div id="preview-container">
       <h5 style={{ margin: 0 }}>PREVIEW</h5>
       <canvas ref={canvasRef} />
 

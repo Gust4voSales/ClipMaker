@@ -1,6 +1,8 @@
 import { createContext, Dispatch, ReactNode, SetStateAction, useEffect, useState } from "react";
+import { ClipMaker } from "../utils/ClipMaker";
 
 export interface IClipContext {
+  screenPlay: ScreenPlay | null;
   generateClip: () => void;
 
   videoInput: File | null;
@@ -26,6 +28,8 @@ interface ClipProviderProps {
   children: ReactNode;
 }
 export function ClipProvider({ children }: ClipProviderProps) {
+  const [screenPlay, setScreenPlay] = useState<ScreenPlay | null>(null);
+
   const [videoInput, setVideoInput] = useState<File | null>(null);
   const [audioInput, setAudioInput] = useState<File | null>(null);
 
@@ -73,6 +77,10 @@ export function ClipProvider({ children }: ClipProviderProps) {
       overlayFilterId,
       colorFilter,
     });
+
+    const video = { media: videoInput!, duration: videoInputDuration };
+    const audio = { media: audioInput!, duration: audioInputDuration };
+    setScreenPlay(ClipMaker.generateClipScreenPlay(video, audio, clipDuration, overlayFilterId, colorFilter));
   }
 
   // Inputs can only be changed when there are video and audio set
@@ -83,6 +91,7 @@ export function ClipProvider({ children }: ClipProviderProps) {
   return (
     <ClipContext.Provider
       value={{
+        screenPlay,
         generateClip,
         videoInput,
         setVideoInput,

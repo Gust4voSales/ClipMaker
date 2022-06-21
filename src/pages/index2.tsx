@@ -14,9 +14,11 @@ import { ColorInput } from "../components/ColorInput";
 import { OverlayInput } from "../components/OverlayInput";
 import { useClip } from "../hooks/useClip";
 import { DisableableComponent } from "../styles/DisableableComponent";
+import { ClipPreview } from "../components/ClipPreview";
 
 export default function Index2() {
   const {
+    screenPlay,
     generateClip,
     videoInput,
     setVideoInput,
@@ -42,27 +44,34 @@ export default function Index2() {
       .padStart(2, "0")}:${timeObj.seconds.toString().padStart(2, "0")}`;
   }
 
+  function renderLeftContainer() {
+    if (screenPlay) return <ClipPreview screenPlay={screenPlay} />;
+    return (
+      <>
+        {!videoInput || !audioInput ? (
+          <Dropfile
+            acceptedExtensions={!videoInput ? videoExtensions : audioExtensions}
+            backgroundImg={!videoInput ? uploadVideoBG : uploadAudioBG}
+            dropfileDragMessage={`Arraste o arquivo de ${!videoInput ? "vídeo" : "audio"}`}
+            onUpload={!videoInput ? handleVideoUpload : handleAudioUpload}
+          />
+        ) : (
+          <InstructionsContainer>
+            <div>
+              <Image src={instructionsBG} objectFit="contain" layout="responsive" />
+            </div>
+            <span>Altere as configurações ao lado como desejar</span>
+          </InstructionsContainer>
+        )}
+      </>
+    );
+  }
+
   return (
     <div>
       <Title>Criar clipe</Title>
       <Container>
-        <LeftContainer>
-          {!videoInput || !audioInput ? (
-            <Dropfile
-              acceptedExtensions={!videoInput ? videoExtensions : audioExtensions}
-              backgroundImg={!videoInput ? uploadVideoBG : uploadAudioBG}
-              dropfileDragMessage={`Arraste o arquivo de ${!videoInput ? "vídeo" : "audio"}`}
-              onUpload={!videoInput ? handleVideoUpload : handleAudioUpload}
-            />
-          ) : (
-            <InstructionsContainer>
-              <div>
-                <Image src={instructionsBG} objectFit="contain" layout="responsive" />
-              </div>
-              <span>Altere as configurações ao lado como desejar</span>
-            </InstructionsContainer>
-          )}
-        </LeftContainer>
+        <LeftContainer>{renderLeftContainer()}</LeftContainer>
         <RightContainer>
           <h2>Configurações</h2>
 
@@ -136,7 +145,6 @@ const Container = styled.div`
   }
 `;
 const LeftContainer = styled.div`
-  border: 2px solid black;
   user-select: none;
   width: 49%;
 `;
