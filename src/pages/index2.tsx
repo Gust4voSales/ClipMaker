@@ -84,11 +84,7 @@ export default function Index2() {
             <Label>Audio</Label>
             <FileInputContainer disabled={!audioInput}>
               <IconStatus>{audioInput ? <Check weight="bold" /> : "?"}</IconStatus>
-<<<<<<< HEAD
               <FileInfoContainer disabled={!audioInput}>
-=======
-              <FileInfoContainer disabled={!videoInput}>
->>>>>>> ce4ece79883a3b08f275cc1d7f05e58ac91ef371
                 <FileTitle>{audioInput ? audioInput.name : "Faça upload de um arquivo de audio ao lado"}</FileTitle>
                 <FileInfo>{audioInputDuration ? parseSecondsToTime(audioInputDuration) : "00:00:00"}</FileInfo>
               </FileInfoContainer>
