@@ -15,6 +15,8 @@ import { OverlayInput } from "../components/OverlayInput";
 import { useClip } from "../hooks/useClip";
 import { DisableableComponent } from "../styles/DisableableComponent";
 import { ClipPreview } from "../components/ClipPreview";
+import { ClipPreview2 } from "../components/ClipPreview copy";
+import { ClipPreview3 } from "../components/ClipPreview copy 2";
 
 export default function Index2() {
   const {
@@ -45,7 +47,7 @@ export default function Index2() {
   }
 
   function renderLeftContainer() {
-    if (screenPlay) return <ClipPreview screenPlay={screenPlay} />;
+    if (screenPlay) return <ClipPreview3 screenPlay={screenPlay} />;
     return (
       <>
         {!videoInput || !audioInput ? (
@@ -91,9 +93,9 @@ export default function Index2() {
             </FileInputContainer>
 
             <Label>Audio</Label>
-            <FileInputContainer disabled={!audioInput}>
+            <FileInputContainer disabled={!videoInput}>
               <IconStatus>{audioInput ? <Check weight="bold" /> : "?"}</IconStatus>
-              <FileInfoContainer disabled={!audioInput}>
+              <FileInfoContainer disabled={!videoInput}>
                 <FileTitle>{audioInput ? audioInput.name : "Faça upload de um arquivo de audio ao lado"}</FileTitle>
                 <FileInfo>{audioInputDuration ? parseSecondsToTime(audioInputDuration) : "00:00:00"}</FileInfo>
               </FileInfoContainer>

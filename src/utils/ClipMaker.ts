@@ -69,7 +69,7 @@ export class ClipMaker {
   }
 
   private static generateTimeline(videoDuration: number, desiredOutputLength: number) {
-    let timeline: ({ start: number; duration: number } | string)[] = [];
+    let timeline: { start: number; duration: number }[] = [];
 
     const clipsLength = { min: 3, max: 5 }; // static for now
 
@@ -90,7 +90,7 @@ export class ClipMaker {
       if (chanceOfAddingBlackTransition === 1 && diff > 0) {
         // 33% of chance to add transition if it doesn't extrapolate the time
         currentVideoDuration += 1; // more 1 sec added
-        timeline.push("transition");
+        timeline.push({ start: -1, duration: 1 });
       }
       currentVideoDuration += randomClipLength;
     }
