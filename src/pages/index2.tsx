@@ -1,241 +1,102 @@
-import styled from "styled-components";
-import { Check, X } from "phosphor-react";
-import theme from "../styles/theme";
-import { Button } from "../components/Button";
-import { Dropfile } from "../components/Dropfile";
-import uploadVideoBG from "../assets/media-player-boy.svg";
-import uploadAudioBG from "../assets/girl-listening.svg";
-import instructionsBG from "../assets/instructions.svg";
-import { audioExtensions, videoExtensions } from "../utils/AcceptedFileExtensions";
-import { DurationInput } from "../components/DurationInput";
-import { formatSecondsToTime } from "../utils/SecondsToTimeFormat";
-import Image from "next/image";
-import { ColorInput } from "../components/ColorInput";
-import { OverlayInput } from "../components/OverlayInput";
-import { useClip } from "../hooks/useClip";
-import { DisableableComponent } from "../styles/DisableableComponent";
+import type { NextPage } from "next";
+import { FormEvent, useEffect, useRef, useState } from "react";
 import { ClipPreview } from "../components/ClipPreview";
-import { ClipPreview2 } from "../components/ClipPreview copy";
-import { ClipPreview3 } from "../components/ClipPreview copy 2";
+import { ClipMaker } from "../utils/ClipMaker";
 
-export default function Index2() {
-  const {
-    screenPlay,
-    generateClip,
-    videoInput,
-    setVideoInput,
-    audioInput,
-    setAudioInput,
-    videoInputDuration,
-    audioInputDuration,
-    areInputsDisabled,
-  } = useClip();
+const GenerateTest: NextPage = () => {
+  const videoEl = useRef<HTMLVideoElement | null>(null);
+  const [video, setVideo] = useState<File | null>(null);
+  const [videoDuration, setVideoDuration] = useState(0);
 
-  function handleVideoUpload(video: File) {
-    setVideoInput(video);
-  }
+  const audioEl = useRef<HTMLAudioElement | null>(null);
+  const [audio, setAudio] = useState<File | null>(null);
+  const [audioDuration, setAudioDuration] = useState(0);
 
-  function handleAudioUpload(audio: File) {
-    setAudioInput(audio);
-  }
+  const [screenPlay, setScreenPlay] = useState<ScreenPlay>();
+  const [clipLength, setClipLength] = useState(30);
+  const [colorFilter, setColorFilter] = useState<string>();
 
-  function parseSecondsToTime(totalSeconds: number) {
-    const timeObj = formatSecondsToTime(totalSeconds);
-    return `${timeObj.hours.toString().padStart(2, "0")}:${timeObj.minutes
-      .toString()
-      .padStart(2, "0")}:${timeObj.seconds.toString().padStart(2, "0")}`;
-  }
+  const [output, setOutput] = useState<string>();
 
-  function renderLeftContainer() {
-    if (screenPlay) return <ClipPreview3 screenPlay={screenPlay} />;
-    return (
-      <>
-        {!videoInput || !audioInput ? (
-          <Dropfile
-            acceptedExtensions={!videoInput ? videoExtensions : audioExtensions}
-            backgroundImg={!videoInput ? uploadVideoBG : uploadAudioBG}
-            dropfileDragMessage={`Arraste o arquivo de ${!videoInput ? "vídeo" : "audio"}`}
-            onUpload={!videoInput ? handleVideoUpload : handleAudioUpload}
-          />
-        ) : (
-          <InstructionsContainer>
-            <div>
-              <Image src={instructionsBG} objectFit="contain" layout="responsive" />
-            </div>
-            <span>Altere as configurações ao lado como desejar</span>
-          </InstructionsContainer>
-        )}
-      </>
-    );
+  // useEffect(() => {
+  //   loadFFMPEG();
+  // }, []);
+
+  const handleLoadedMetadata = () => {
+    const videoCurrent = videoEl.current;
+    const audioCurrent = audioEl.current;
+    if (!videoCurrent || !audioCurrent) return;
+    setVideoDuration(videoCurrent.duration);
+    setAudioDuration(audioCurrent.duration);
+    console.log(`The video is ${videoCurrent.duration} seconds long.`);
+    console.log(`The audio is ${audioCurrent.duration} seconds long.`);
+  };
+
+  async function handle(e: FormEvent) {
+    e.preventDefault();
+
+    if (videoDuration === 0 || audioDuration === 0) return;
+
+    // const screenPlayObj = ClipMaker.generateClipScreenPlay(videoDuration, clipLength, true, colorFilter);
+    // setScreenPlay(screenPlayObj);
+    // console.log(screenPlayObj);
+
+    // const clipMaker = new ClipMaker(video!, audio!, screenPlayObj);
+
+    // const videoData = await clipMaker.getVideoClip();
+    // const url = URL.createObjectURL(new Blob([videoData!.buffer]));
+    // const url = URL.createObjectURL(new Blob([videoData!.buffer], {type: "video/x-matroska audio/x-matroska"}))
+    // setOutput(url);
   }
 
   return (
     <div>
-      <Title>Criar clipe</Title>
-      <Container>
-        <LeftContainer>{renderLeftContainer()}</LeftContainer>
-        <RightContainer>
-          <h2>Configurações</h2>
+      <form onSubmit={handle}>
+        <div>
+          <label>VIDEO</label>
+          <input type="file" name="video" required onChange={(e) => setVideo(e.target.files!.item(0))} />
+        </div>
+        <div>
+          <label>AUDIO</label>
+          <input type="file" name="audio" required onChange={(e) => setAudio(e.target.files!.item(0))}></input>
+        </div>
+        <div>
+          <label>DURAÇÃO DO CLIPE</label>
+          <input
+            type="number"
+            name="clip-duration"
+            required
+            value={clipLength}
+            onChange={(e) => setClipLength(Number(e.target.value))}
+          />
+        </div>
+        <div>
+          <label>COR DE FILTRO</label>
+          <input type="color" name="color" required onChange={(e) => setColorFilter(e.target.value)}></input>
+        </div>
 
-          <Form>
-            <Label>Vídeo</Label>
-            <FileInputContainer style={{ marginBottom: theme.spacing(2) }}>
-              <IconStatus>{videoInput ? <Check weight="bold" /> : "?"}</IconStatus>
-              <FileInfoContainer>
-                <FileTitle>{videoInput ? videoInput.name : "Faça upload de um arquivo de vídeo ao lado"}</FileTitle>
-                <FileInfo>{videoInputDuration ? parseSecondsToTime(videoInputDuration) : "00:00:00"}</FileInfo>
-              </FileInfoContainer>
-              {videoInput && (
-                <RemoveFileButton onClick={() => setVideoInput(null)}>
-                  <X weight="bold" />
-                </RemoveFileButton>
-              )}
-            </FileInputContainer>
+        <button type="submit">CRIAR</button>
+      </form>
+      <div>
+        {video && (
+          <video
+            controls
+            width={200}
+            ref={videoEl}
+            onDurationChange={handleLoadedMetadata}
+            src={URL.createObjectURL(video)}
+          ></video>
+        )}
+        {audio && <audio controls ref={audioEl} src={URL.createObjectURL(audio)}></audio>}
+        {<span>{colorFilter}</span>}
+      </div>
 
-            <Label>Audio</Label>
-            <FileInputContainer disabled={!videoInput}>
-              <IconStatus>{audioInput ? <Check weight="bold" /> : "?"}</IconStatus>
-              <FileInfoContainer disabled={!videoInput}>
-                <FileTitle>{audioInput ? audioInput.name : "Faça upload de um arquivo de audio ao lado"}</FileTitle>
-                <FileInfo>{audioInputDuration ? parseSecondsToTime(audioInputDuration) : "00:00:00"}</FileInfo>
-              </FileInfoContainer>
-              {audioInput && (
-                <RemoveFileButton onClick={() => setAudioInput(null)}>
-                  <X weight="bold" />
-                </RemoveFileButton>
-              )}
-            </FileInputContainer>
-
-            <GroupFields>
-              <div>
-                <Label>Duração</Label>
-                <DurationInput />
-              </div>
-
-              <div>
-                <Label>Filtro</Label>
-                <OverlayInput />
-              </div>
-
-              <div>
-                <Label>Filtro de cor</Label>
-                <ColorInput />
-              </div>
-            </GroupFields>
-
-            <SubmitButton onClick={generateClip} disabled={areInputsDisabled()}>
-              Gerar Clipe
-            </SubmitButton>
-          </Form>
-        </RightContainer>
-      </Container>
+      <div style={{ display: "flex", columnGap: 10 }}>
+        {output && <video controls width={640} height={360} src={output}></video>}
+        {/* {video && audio && screenPlay && <ClipPreview videoInput={video} audioInput={audio} screenPlay={screenPlay} />} */}
+      </div>
     </div>
   );
-}
+};
 
-const Title = styled.h1``;
-const Container = styled.div`
-  display: flex;
-  justify-content: space-between;
-  column-gap: ${(props) => props.theme.spacing(2)};
-  margin-top: ${(props) => props.theme.spacing(2)};
-  & > div:first-child,
-  & > div:first-child + div {
-    flex: 1;
-    padding: ${(props) => props.theme.spacing(2)};
-    border-radius: ${(props) => props.theme.spacing()};
-  }
-`;
-const LeftContainer = styled.div`
-  user-select: none;
-  width: 49%;
-`;
-const InstructionsContainer = styled.div`
-  display: flex;
-  width: 100%;
-  height: 100%;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  row-gap: ${(props) => props.theme.spacing(4)};
-  font-weight: 500;
-  color: ${(props) => props.theme.colors.primary};
-  & > div {
-    width: 50%;
-    height: 50%;
-  }
-`;
-
-const RightContainer = styled.div`
-  background-color: #fff;
-  width: 49%;
-`;
-const Form = styled.div`
-  display: flex;
-  flex-direction: column;
-  margin-top: ${(props) => props.theme.spacing(2)};
-`;
-const Label = styled.label`
-  font-size: 1.8rem;
-  font-weight: 500;
-`;
-const FileInputContainer = styled.div<DisableableComponent>`
-  display: flex;
-  background-color: ${({ disabled, theme }) => (disabled ? theme.colors.disabledBG : theme.colors.background)};
-  opacity: ${({ disabled, theme }) => (disabled ? theme.disabledOpacity : 1)};
-  align-items: center;
-  padding: ${(props) => props.theme.spacing(2)};
-  height: 8rem;
-  border-radius: ${(props) => props.theme.spacing()};
-`;
-const IconStatus = styled.span`
-  background-color: ${(props) => props.theme.colors.primary};
-  height: 100%;
-  width: calc(8rem - (2 * ${(props) => props.theme.spacing(2)}));
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  border-radius: ${(props) => props.theme.spacing(0.5)};
-  margin-right: ${(props) => props.theme.spacing(2)};
-  color: #fff;
-  font-size: 1.8rem;
-  & svg {
-    width: 2.4rem;
-    height: 2.4rem;
-  }
-`;
-const FileInfoContainer = styled.div<DisableableComponent>`
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-
-  color: ${({ disabled, theme }) => (disabled ? theme.colors.disabledColor : theme.colors.primary)};
-`;
-const FileTitle = styled.h4`
-  font-weight: 500;
-`;
-const FileInfo = styled.span``;
-const RemoveFileButton = styled.button`
-  margin-left: auto;
-  border: none;
-  background: none;
-  color: ${(props) => props.theme.colors.error};
-  & svg {
-    width: 2.4rem;
-    height: 2.4rem;
-  }
-`;
-const GroupFields = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: ${(props) => props.theme.spacing(2)};
-  & > div {
-    display: flex;
-    flex-direction: column;
-  }
-`;
-const SubmitButton = styled(Button)`
-  margin: ${(props) => props.theme.spacing(4)} auto ${(props) => props.theme.spacing()} auto;
-`;
+export default GenerateTest;

@@ -5,15 +5,8 @@ interface ClipPreviewProps {
   screenPlay: ScreenPlay;
 }
 
-enum VIDEO_STATES {
-  PLAYING,
-  PAUSED,
-  FINISHED,
-}
-
 let timeoutTickingFrameRef: NodeJS.Timeout | null = null;
 export function ClipPreview({ screenPlay }: ClipPreviewProps) {
-  const FRAME_RATE = 33.3; // TO DO: Get frame rate from the input video instead of using hardcoded 33.3
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [canvas, setCanvas] = useState<HTMLCanvasElement>();
 
@@ -21,9 +14,9 @@ export function ClipPreview({ screenPlay }: ClipPreviewProps) {
   const [audio, setAudio] = useState<HTMLAudioElement>();
   const [videoOverlay, setVideoOverlay] = useState<HTMLVideoElement>();
 
-  const [frames, setFrames] = useState<number[]>([]);
-  const [videoState, setVideoState] = useState(VIDEO_STATES.PAUSED);
-  const [currentFrameIndex, setCurrentFrameIndex] = useState(0);
+  const [videoTimer, setVideoTimer] = useState(0);
+  let videoPlaybackPosition = screenPlay.timeline[0].start; // in seconds
+  let currentClipIndex = 0;
 
   useEffect(() => {
     if (!canvasRef.current) return;
@@ -34,69 +27,54 @@ export function ClipPreview({ screenPlay }: ClipPreviewProps) {
   useEffect(() => {
     if (!canvas) return;
 
+    console.log("new screenplay");
+    console.log(screenPlay.timeline);
     const initializedMedia = initializeVideoAndAudio();
     setVideo(initializedMedia.video);
     setAudio(initializedMedia.audio);
     setVideoOverlay(initializedMedia.videoOverlay);
   }, [canvas, screenPlay]);
 
-  // once video has been referenced then set the frames
+  // Set events
   useEffect(() => {
     if (!video) return;
 
-    setFrames(parseTimeLineToFramesArray());
+    video.addEventListener(
+      "play",
+      () => {
+        if (timeoutTickingFrameRef) clearTimeout(timeoutTickingFrameRef);
+
+        // using absolute value because transitions use negative values
+        video.currentTime = Math.abs(videoPlaybackPosition);
+
+        audio?.play();
+        videoOverlay?.play();
+        processVideo();
+      },
+      false
+    );
+    video.addEventListener(
+      "pause",
+      () => {
+        if (timeoutTickingFrameRef) clearTimeout(timeoutTickingFrameRef);
+
+        audio?.pause();
+        videoOverlay?.pause();
+      },
+      false
+    );
+    video.addEventListener(
+      "timeupdate",
+      () => {
+        setVideoTimer(calculateCurrentTime());
+      },
+      false
+    );
   }, [video]);
 
-  // HANDLE VIDEO STATES CHANGES
-  useEffect(() => {
-    if (!video || !audio || (screenPlay.overlayFilter && !videoOverlay)) return;
-
-    if (timeoutTickingFrameRef)
-      // clear process video recursive call that are pending if it exists
-      clearTimeout(timeoutTickingFrameRef!);
-
-    if (videoState === VIDEO_STATES.PLAYING) {
-      audio.play();
-      videoOverlay?.play();
-      processVideo(currentFrameIndex);
-    } else {
-      audio.pause();
-      videoOverlay?.pause();
-    }
-
-    if (videoState === VIDEO_STATES.FINISHED) {
-      audio.currentTime = 0;
-      if (videoOverlay) videoOverlay.currentTime = 0;
-      setCurrentFrameIndex(0);
-    }
-  }, [videoState]);
-
-  function parseTimeLineToFramesArray() {
-    let framesArray: number[] = [];
-    screenPlay.timeline.forEach((line) => {
-      if (line.toString() === "transition") {
-        // add 1 second (which is the amount of FRAME_RATE) of -1 to represent a transition
-        for (let i = 0; i < FRAME_RATE; i++) {
-          framesArray.push(-1);
-        }
-      } else {
-        const clip = line as { start: number; duration: number };
-
-        const frameClipStart = Math.round(clip.start * FRAME_RATE);
-        const frameClipEnd = Math.round((clip.start + clip.duration) * FRAME_RATE);
-
-        for (let i = frameClipStart; i <= frameClipEnd; i++) {
-          framesArray.push(i);
-        }
-      }
-    });
-    // console.log(framesArray);
-    return framesArray;
-  }
-
   function resetPreview() {
-    setCurrentFrameIndex(0);
-    setVideoState(VIDEO_STATES.PAUSED);
+    videoPlaybackPosition = screenPlay.timeline[0].start;
+    currentClipIndex = 0;
     if (timeoutTickingFrameRef) clearTimeout(timeoutTickingFrameRef);
 
     // destroy previous medias elements
@@ -122,6 +100,7 @@ export function ClipPreview({ screenPlay }: ClipPreviewProps) {
     video.setAttribute("id", "video-preview-input");
     video.src = URL.createObjectURL(screenPlay.videoInput.media);
     video.style.display = "none";
+    video.volume = 0;
     video.load();
 
     const audio = document.createElement("audio");
@@ -151,38 +130,109 @@ export function ClipPreview({ screenPlay }: ClipPreviewProps) {
     return { video, audio, videoOverlay };
   }
 
-  function processVideo(frameIndex: number) {
-    if (frameIndex >= frames.length - 1) {
-      setVideoState(VIDEO_STATES.FINISHED);
-      return;
+  function calculateCurrentTime() {
+    let ellapsedTime = 0; // total ellapsedTime to be calculated
+
+    let elapsedTimeFromPreviousClips = 0;
+    screenPlay.timeline.slice(0, currentClipIndex).forEach((clip) => {
+      elapsedTimeFromPreviousClips += clip.duration;
+    });
+
+    const currentClip = screenPlay.timeline[currentClipIndex];
+    // transition
+    if (currentClip.start === -1) {
+      ellapsedTime = videoTimer + video!.currentTime + elapsedTimeFromPreviousClips;
+    } else {
+      // ellapsedTimeFromCurrentClip => videoPlaybackPosition - currentClip.start
+      // ellapsedTimeTotal => ellapsedTimeFromCurrentClip + elapsedTimeFromPreviousClips
+      ellapsedTime = videoPlaybackPosition - currentClip.start + elapsedTimeFromPreviousClips;
     }
-
-    showVideoFrame(frames[frameIndex]);
-    showFrameNumbers(frames[frameIndex], frameIndex);
-
-    frameIndex++;
-    setCurrentFrameIndex(frameIndex);
-
-    timeoutTickingFrameRef = setTimeout(() => {
-      processVideo(frameIndex);
-    }, FRAME_RATE);
+    return Math.round(ellapsedTime);
   }
 
-  function showVideoFrame(frame: number) {
+  // called when the video is supposed to finish
+  function finishVideo() {
+    currentClipIndex = 0; // reset clips index
+
+    // reset video time to the start of the 1st clip and other medias to the inital time
+    videoPlaybackPosition = screenPlay.timeline[0].start;
+    setVideoTimer(videoPlaybackPosition);
+    audio!.currentTime = 0;
+    if (videoOverlay) videoOverlay!.currentTime = 0;
+
+    video!.pause();
+  }
+
+  function processVideo() {
+    const isTransition = screenPlay.timeline[currentClipIndex].start === -1;
+    // transitions start are -1, so we add 1 when computing clipEndTime of a transition
+    const clipEndTime =
+      screenPlay.timeline[currentClipIndex].start +
+      screenPlay.timeline[currentClipIndex].duration +
+      (isTransition ? 1 : 0);
+
+    // Example: In a 3 seconds clip duration our videoPlaybackPosition starts at -3,
+    // and once it reaches 0 it means the transition has finished after 3 seconds (this is checked further below)
+    if (isTransition) {
+      // (initial set) transition has not started yet, set video current time to 0
+      if (videoPlaybackPosition >= 0) {
+        video!.currentTime = 0;
+      }
+      videoPlaybackPosition = -screenPlay.timeline[currentClipIndex].duration + video!.currentTime;
+    }
+
+    // CHECK IF CURRENT CLIP HAS FINISHED SO WE CAN JUMP TO THE NEXT IF THERE IS ONE
+    if (video!.currentTime > clipEndTime) {
+      // end of the video (no more clips to push, so reset)
+      if (currentClipIndex === screenPlay.timeline.length - 1) {
+        finishVideo();
+        return;
+      }
+
+      // jump to the next clip
+      currentClipIndex += 1;
+      video!.currentTime = screenPlay.timeline[currentClipIndex].start;
+    }
+
+    // if it is not a transition, set videoPlaybackPosition to keep track of the video currentTime
+    if (!isTransition) videoPlaybackPosition = video!.currentTime;
+
+    showVideoFrame();
+    showCurrentClipHelper();
+
+    timeoutTickingFrameRef = setTimeout(() => {
+      processVideo();
+    }, 0);
+  }
+
+  // DEBUGGER function that displays information
+  function showCurrentClipHelper() {
+    const context = canvas!.getContext("2d")!;
+    context.font = "24px Arial";
+    context.textAlign = "left";
+    context.textBaseline = "top";
+    context.fillStyle = "white";
+    const endOfClip = screenPlay.timeline[currentClipIndex].start + screenPlay.timeline[currentClipIndex].duration;
+    context.fillText(
+      `ATUAL: ${Math.round(videoPlaybackPosition)} - FIM: ${endOfClip} - CLIP_INDEX: ${currentClipIndex}/${
+        screenPlay.timeline.length - 1
+      }`,
+      5,
+      5
+    );
+  }
+
+  function showVideoFrame() {
     const context = canvas!.getContext("2d")!;
 
-    if (frame === -1) {
-      // transition
+    //transition
+    if (screenPlay.timeline[currentClipIndex].start === -1) {
       context.fillStyle = "black";
       context.fillRect(0, 0, canvas!.width, canvas!.height);
 
       if (screenPlay.overlayFilter) addFilterOverlay(context);
       return;
     }
-
-    const time = frame / FRAME_RATE;
-
-    video!.currentTime = time;
     context.drawImage(video!, 0, 0, canvas!.width, canvas!.height);
 
     if (screenPlay.overlayFilter) addFilterOverlay(context);
@@ -199,16 +249,6 @@ export function ClipPreview({ screenPlay }: ClipPreviewProps) {
     context.globalAlpha = 0.3;
     context.drawImage(videoOverlay!, 0, 0, canvas!.width, canvas!.height);
     context.globalAlpha = 1;
-  }
-
-  function showFrameNumbers(frame: number, frameIndex: number) {
-    const context = canvas!.getContext("2d")!;
-    context.font = "30px Arial";
-    context.textAlign = "left";
-    context.textBaseline = "top";
-    context.fillStyle = "white";
-    const currentTime = Math.round(frameIndex / FRAME_RATE).toString();
-    context.fillText(frame.toString() + "/" + currentTime, 5, 5);
   }
 
   // Since all medias are independent and are playing at the same time, changing the videos' current progress
@@ -238,20 +278,19 @@ export function ClipPreview({ screenPlay }: ClipPreviewProps) {
 
   return (
     <div id="preview-container">
-      <h5 style={{ margin: 0 }}>PREVIEW</h5>
       <canvas ref={canvasRef} />
 
       <div>
         <button
           onClick={() => {
-            if (videoState !== VIDEO_STATES.PLAYING) setVideoState(VIDEO_STATES.PLAYING);
+            if (video?.paused) video.play();
           }}
         >
           PLAY
         </button>
         <button
           onClick={() => {
-            if (videoState === VIDEO_STATES.PLAYING) setVideoState(VIDEO_STATES.PAUSED);
+            if (!video?.paused) video?.pause();
           }}
         >
           PAUSE
@@ -262,17 +301,17 @@ export function ClipPreview({ screenPlay }: ClipPreviewProps) {
           style={{ width: "100%" }}
           min={0}
           max={screenPlay.duration}
-          onMouseDown={() => {
-            setVideoState(VIDEO_STATES.PAUSED);
-          }}
-          onMouseUp={() => setVideoState(VIDEO_STATES.PLAYING)}
-          value={Math.round(currentFrameIndex / FRAME_RATE)}
-          onChange={(e) => {
-            syncMediasWithNewVideoProgress(Number(e.target.value));
-            setCurrentFrameIndex(Math.round(Number(e.target.value) * FRAME_RATE));
-          }}
+          // onMouseDown={() => {
+          //   setVideoState(VIDEO_STATES.PAUSED);
+          // }}
+          // onMouseUp={() => setVideoState(VIDEO_STATES.PLAYING)}
+          // value={Math.round(videoPlaybackPosition)}
+          // onChange={(e) => {
+          //   video!.currentTime = Number(e.target.value);
+          //   syncMediasWithNewVideoProgress(Number(e.target.value));
+          // }}
         />
-        <span>{Math.round(currentFrameIndex / FRAME_RATE)}</span>
+        <span>{videoTimer}</span>
       </div>
     </div>
   );

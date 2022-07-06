@@ -27,6 +27,8 @@ export class ClipMaker {
 
   outputClip: Uint8Array | null;
 
+  static transitionDuration = 1;
+
   // TO-DO: ADAPT TO THE NEW SCREENPLAY FORMAT WHERE THE INPUTS ARE PASSED
   constructor(videoInput: File, audioInput: File, screenPlay: ScreenPlay) {
     this.videoInput = videoInput;
@@ -89,8 +91,8 @@ export class ClipMaker {
       const chanceOfAddingBlackTransition = randomInRange(1, 3);
       if (chanceOfAddingBlackTransition === 1 && diff > 0) {
         // 33% of chance to add transition if it doesn't extrapolate the time
-        currentVideoDuration += 1; // more 1 sec added
-        timeline.push({ start: -1, duration: 1 });
+        currentVideoDuration += ClipMaker.transitionDuration;
+        timeline.push({ start: -1, duration: ClipMaker.transitionDuration });
       }
       currentVideoDuration += randomClipLength;
     }
@@ -120,14 +122,14 @@ export class ClipMaker {
     let concat_clips_array: any = [];
 
     // 1 sec video of black
-    let black_transition_command = `-t 1 -i ${input} -preset ultrafast -vf setsar=1,drawbox=t=fill:c=black black_transition${this.videoExtension}`;
+    let black_transition_command = `-t ${ClipMaker.transitionDuration} -i ${input} -preset ultrafast -vf setsar=1,drawbox=t=fill:c=black black_transition${this.videoExtension}`;
 
     await ffmpeg.run(...black_transition_command.split(" "));
 
     let index = 0;
 
     while (index < this.screenPlay.timeline.length) {
-      if (this.screenPlay.timeline[index].toString() === "transition") {
+      if (this.screenPlay.timeline[index].start === -1) {
         concat_clips_array.push(`file black_transition${this.videoExtension}`);
       } else {
         const clip = this.screenPlay.timeline[index] as {
@@ -180,15 +182,11 @@ export class ClipMaker {
   }
 
   private async addOverlayFilter(inputName: string) {
-    // ffmpeg.FS("writeFile", "hearts.mp4", await fetchFile("/overlays/hearts.mp4"));
-    ffmpeg.FS(
-      "writeFile",
-      this.screenPlay.overlayFilter!.replace(".", ""),
-      await fetchFile(this.screenPlay.overlayFilter!)
-    );
+    const overlayFileName = this.screenPlay.overlayFilter!.replace("/overlays/", "");
+    ffmpeg.FS("writeFile", overlayFileName, await fetchFile(this.screenPlay.overlayFilter!));
 
     const outputName = `filter_output${this.videoExtension}`;
-    let overlayVideoCommand = `-i ${inputName} -stream_loop -1 -i hearts.mp4 -t ${this.screenPlay.duration} -filter_complex [1][0]scale2ref=h=ow:w=iw[A][B];[A]format=argb,colorchannelmixer=aa=0.3[Btransparent];[B][Btransparent]overlay=(main_w-w):(main_h-h) -pix_fmt yuv420p -preset ultrafast ${outputName}`;
+    let overlayVideoCommand = `-i ${inputName} -stream_loop -1 -i ${overlayFileName} -t ${this.screenPlay.duration} -filter_complex [1][0]scale2ref=h=ow:w=iw[A][B];[A]format=argb,colorchannelmixer=aa=0.3[Btransparent];[B][Btransparent]overlay=(main_w-w):(main_h-h) -pix_fmt yuv420p -preset ultrafast ${outputName}`;
     await ffmpeg.run(...overlayVideoCommand.split(" "));
 
     return outputName;

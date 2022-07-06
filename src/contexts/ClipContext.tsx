@@ -1,5 +1,5 @@
 import { createContext, Dispatch, ReactNode, SetStateAction, useEffect, useState } from "react";
-import { ClipMaker } from "../utils/ClipMaker";
+import { ClipMaker, loadFFMPEG } from "../utils/ClipMaker";
 
 export interface IClipContext {
   screenPlay: ScreenPlay | null;
@@ -39,6 +39,10 @@ export function ClipProvider({ children }: ClipProviderProps) {
 
   const [videoInputDuration, setVideoInputDuration] = useState(0);
   const [audioInputDuration, setAudioInputDuration] = useState(0);
+
+  useEffect(() => {
+    loadFFMPEG();
+  }, []);
 
   // Calculates the videoInput duration
   useEffect(() => {
