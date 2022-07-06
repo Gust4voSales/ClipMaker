@@ -31,7 +31,7 @@ export function Dropfile({ acceptedExtensions, backgroundImg, dropfileDragMessag
       <input {...getInputProps()} />
       <Content>
         <BackgroundImgContainer>
-          {!isDragReject ? <BackgroundImg src={backgroundImg} layout="fill" /> : <FileX weight="fill" />}
+          {!isDragReject ? <BackgroundImg src={backgroundImg} priority layout="fill" /> : <FileX weight="fill" />}
         </BackgroundImgContainer>
         {isDragReject ? (
           <ErrorMessage>Arquivo não suportado</ErrorMessage>
