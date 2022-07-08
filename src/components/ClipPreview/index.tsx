@@ -29,7 +29,7 @@ export function ClipPreview({ screenPlay }: ClipPreviewProps) {
     console.log("new screenplay");
     console.log(screenPlay.timeline);
 
-    const initializedMedia = initializeVideoAndAudio();
+    const initializedMedia = initializeMedias();
     setVideo(initializedMedia.video);
     setAudio(initializedMedia.audio);
     setVideoOverlay(initializedMedia.videoOverlay);
@@ -89,7 +89,7 @@ export function ClipPreview({ screenPlay }: ClipPreviewProps) {
     }
   }
 
-  function initializeVideoAndAudio() {
+  function initializeMedias() {
     resetPreview(); // remove/reset old preview stuff
 
     const container = document.getElementById("invisible-medias-preview-container");
