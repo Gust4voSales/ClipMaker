@@ -95,7 +95,6 @@ export function ClipPreview({ screenPlay }: ClipPreviewProps) {
     const container = document.getElementById("invisible-medias-preview-container");
     const video = document.createElement("video");
     container?.appendChild(video);
-    video.setAttribute("id", "video-preview-input");
     video.src = URL.createObjectURL(screenPlay.videoInput.media);
     video.style.display = "none";
     video.volume = 0;
@@ -103,7 +102,6 @@ export function ClipPreview({ screenPlay }: ClipPreviewProps) {
 
     const audio = document.createElement("audio");
     container?.appendChild(audio);
-    audio.setAttribute("id", "audio-preview-input");
     audio.src = URL.createObjectURL(screenPlay.audioInput.media);
     audio.style.display = "none";
     audio.loop = true;
@@ -113,7 +111,6 @@ export function ClipPreview({ screenPlay }: ClipPreviewProps) {
     if (screenPlay.overlayFilter) {
       videoOverlay = document.createElement("video");
       container?.appendChild(videoOverlay);
-      videoOverlay.setAttribute("id", "video-preview-overlay");
       videoOverlay.src = screenPlay.overlayFilter;
       videoOverlay.style.display = "none";
       videoOverlay.volume = 0;
