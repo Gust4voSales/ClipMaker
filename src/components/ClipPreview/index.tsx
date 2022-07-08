@@ -28,6 +28,7 @@ export function ClipPreview({ screenPlay }: ClipPreviewProps) {
 
     console.log("new screenplay");
     console.log(screenPlay.timeline);
+
     const initializedMedia = initializeVideoAndAudio();
     setVideo(initializedMedia.video);
     setAudio(initializedMedia.audio);
@@ -38,35 +39,36 @@ export function ClipPreview({ screenPlay }: ClipPreviewProps) {
   useEffect(() => {
     if (!video) return;
 
-    video.addEventListener(
-      "play",
-      () => {
-        if (timeoutTickingFrameRef) clearTimeout(timeoutTickingFrameRef);
+    const onPlay = () => {
+      if (timeoutTickingFrameRef) clearTimeout(timeoutTickingFrameRef);
 
-        // using absolute value because transitions use negative values
-        video.currentTime = Math.abs(videoPlaybackPosition);
+      // using absolute value because transitions use negative values
+      video.currentTime = Math.abs(videoPlaybackPosition);
 
-        audio?.play();
-        videoOverlay?.play();
-        processVideo(); // process the canvas
-      },
-      false
-    );
-    video.addEventListener(
-      "pause",
-      () => {
-        if (timeoutTickingFrameRef) clearTimeout(timeoutTickingFrameRef);
+      audio?.play();
+      videoOverlay?.play();
+      processVideo(); // process the canvas
+    };
+    const onPause = () => {
+      if (timeoutTickingFrameRef) clearTimeout(timeoutTickingFrameRef);
 
-        audio?.pause();
-        videoOverlay?.pause();
-      },
-      false
-    );
+      audio?.pause();
+      videoOverlay?.pause();
+    };
 
+    video.addEventListener("play", onPlay, false);
+    video.addEventListener("pause", onPause, false);
     // updates progress indicators
     video.addEventListener("timeupdate", setVideoTimers, false);
+
+    return () => {
+      video.removeEventListener("play", onPlay, false);
+      video.removeEventListener("pause", onPause, false);
+      video.removeEventListener("timeupdate", setVideoTimers, false);
+    };
   }, [video]);
 
+  // updates elements that are responsible of displaying the progress of the video (timeline and timer)
   function setVideoTimers() {
     const currentTime = calculateCurrentTime();
 
@@ -77,28 +79,20 @@ export function ClipPreview({ screenPlay }: ClipPreviewProps) {
   }
 
   function resetPreview() {
-    videoPlaybackPosition = screenPlay.timeline[0].start;
-    currentClipIndex = 0;
     if (timeoutTickingFrameRef) clearTimeout(timeoutTickingFrameRef);
 
     // destroy previous medias elements
-    const container = document.getElementById("preview-container");
+    const container = document.getElementById("invisible-medias-preview-container");
 
-    const videoEl = document.getElementById("video-preview-input");
-    const audioEl = document.getElementById("audio-preview-input");
-    const videoOverlayEl = document.getElementById("video-preview-overlay");
-
-    if (videoEl && audioEl) {
-      container?.removeChild(videoEl);
-      container?.removeChild(audioEl);
+    while (container!.lastChild) {
+      container!.removeChild(container!.lastChild);
     }
-    if (videoOverlayEl) container?.removeChild(videoOverlayEl);
   }
 
   function initializeVideoAndAudio() {
     resetPreview(); // remove/reset old preview stuff
 
-    const container = document.getElementById("preview-container");
+    const container = document.getElementById("invisible-medias-preview-container");
     const video = document.createElement("video");
     container?.appendChild(video);
     video.setAttribute("id", "video-preview-input");
@@ -302,7 +296,8 @@ export function ClipPreview({ screenPlay }: ClipPreviewProps) {
   }
 
   return (
-    <div id="preview-container">
+    <div>
+      <div id="invisible-medias-preview-container"></div>
       <canvas ref={canvasRef} />
 
       <div>
@@ -327,9 +322,10 @@ export function ClipPreview({ screenPlay }: ClipPreviewProps) {
           min={0}
           max={screenPlay.duration}
           style={{ width: "100%" }}
+          defaultValue="0"
           onChange={(e) => handleVideoTimelineChange(Number(e.target.value))}
         />
-        <span id="timer-progress"></span>
+        <span id="timer-progress">0</span>
       </div>
     </div>
   );
