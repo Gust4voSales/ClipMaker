@@ -14,7 +14,6 @@ export function ClipPreview({ screenPlay }: ClipPreviewProps) {
   const [audio, setAudio] = useState<HTMLAudioElement>();
   const [videoOverlay, setVideoOverlay] = useState<HTMLVideoElement>();
 
-  const [videoTimer, setVideoTimer] = useState(0);
   let videoPlaybackPosition = screenPlay.timeline[0].start; // in seconds
   let currentClipIndex = 0;
 
@@ -35,7 +34,7 @@ export function ClipPreview({ screenPlay }: ClipPreviewProps) {
     setVideoOverlay(initializedMedia.videoOverlay);
   }, [canvas, screenPlay]);
 
-  // Set events
+  // Set video related events
   useEffect(() => {
     if (!video) return;
 
@@ -49,7 +48,7 @@ export function ClipPreview({ screenPlay }: ClipPreviewProps) {
 
         audio?.play();
         videoOverlay?.play();
-        processVideo();
+        processVideo(); // process the canvas
       },
       false
     );
@@ -63,14 +62,19 @@ export function ClipPreview({ screenPlay }: ClipPreviewProps) {
       },
       false
     );
-    video.addEventListener(
-      "timeupdate",
-      () => {
-        setVideoTimer(calculateCurrentTime());
-      },
-      false
-    );
+
+    // updates progress indicators
+    video.addEventListener("timeupdate", setVideoTimers, false);
   }, [video]);
+
+  function setVideoTimers() {
+    const currentTime = calculateCurrentTime();
+
+    // Set timeline progress (range) and timer progress span values
+    document.getElementById("timer-progress")!.textContent = String(currentTime);
+    const timeline = document.getElementById("timeline-progress") as HTMLInputElement;
+    timeline.value = String(currentTime);
+  }
 
   function resetPreview() {
     videoPlaybackPosition = screenPlay.timeline[0].start;
@@ -130,18 +134,18 @@ export function ClipPreview({ screenPlay }: ClipPreviewProps) {
     return { video, audio, videoOverlay };
   }
 
+  // calculates current progress of the video
   function calculateCurrentTime() {
     let ellapsedTime = 0; // total ellapsedTime to be calculated
-
     let elapsedTimeFromPreviousClips = 0;
     screenPlay.timeline.slice(0, currentClipIndex).forEach((clip) => {
       elapsedTimeFromPreviousClips += clip.duration;
     });
-
     const currentClip = screenPlay.timeline[currentClipIndex];
     // transition
     if (currentClip.start === -1) {
-      ellapsedTime = videoTimer + video!.currentTime + elapsedTimeFromPreviousClips;
+      // ellapsedTime = videoTimer + video!.currentTime + elapsedTimeFromPreviousClips;
+      ellapsedTime = video!.currentTime + elapsedTimeFromPreviousClips;
     } else {
       // ellapsedTimeFromCurrentClip => videoPlaybackPosition - currentClip.start
       // ellapsedTimeTotal => ellapsedTimeFromCurrentClip + elapsedTimeFromPreviousClips
@@ -156,7 +160,6 @@ export function ClipPreview({ screenPlay }: ClipPreviewProps) {
 
     // reset video time to the start of the 1st clip and other medias to the inital time
     videoPlaybackPosition = screenPlay.timeline[0].start;
-    setVideoTimer(videoPlaybackPosition);
     audio!.currentTime = 0;
     if (videoOverlay) videoOverlay!.currentTime = 0;
 
@@ -165,7 +168,7 @@ export function ClipPreview({ screenPlay }: ClipPreviewProps) {
 
   function processVideo() {
     const isTransition = screenPlay.timeline[currentClipIndex].start === -1;
-    // transitions start are -1, so we add 1 when computing clipEndTime of a transition
+    // transitions starts are -1, so we add 1 when computing the clipEndTime of a transition
     const clipEndTime =
       screenPlay.timeline[currentClipIndex].start +
       screenPlay.timeline[currentClipIndex].duration +
@@ -251,6 +254,28 @@ export function ClipPreview({ screenPlay }: ClipPreviewProps) {
     context.globalAlpha = 1;
   }
 
+  // This is called when the user wants to change the timeline progress of the video
+  function handleVideoTimelineChange(time: number) {
+    let secondsAccumulator = 0;
+    for (let index = 0; index < screenPlay.timeline.length; index++) {
+      secondsAccumulator += screenPlay.timeline[index].duration;
+      if (time <= secondsAccumulator) {
+        currentClipIndex = index;
+        const secsPassedFromClip = screenPlay.timeline[currentClipIndex].duration - (secondsAccumulator - time);
+        videoPlaybackPosition =
+          screenPlay.timeline[index].start === -1
+            ? -screenPlay.timeline[currentClipIndex].duration + secsPassedFromClip
+            : screenPlay.timeline[index].start + secsPassedFromClip;
+
+        video!.currentTime = videoPlaybackPosition;
+        video!.play();
+        break;
+      }
+    }
+
+    syncMediasWithNewVideoProgress(time);
+  }
+
   // Since all medias are independent and are playing at the same time, changing the videos' current progress
   // won't change the other medias progress, this function syncs the other medias with the current
   // progress of the video
@@ -297,21 +322,14 @@ export function ClipPreview({ screenPlay }: ClipPreviewProps) {
         </button>
 
         <input
+          id="timeline-progress"
           type="range"
-          style={{ width: "100%" }}
           min={0}
           max={screenPlay.duration}
-          // onMouseDown={() => {
-          //   setVideoState(VIDEO_STATES.PAUSED);
-          // }}
-          // onMouseUp={() => setVideoState(VIDEO_STATES.PLAYING)}
-          // value={Math.round(videoPlaybackPosition)}
-          // onChange={(e) => {
-          //   video!.currentTime = Number(e.target.value);
-          //   syncMediasWithNewVideoProgress(Number(e.target.value));
-          // }}
+          style={{ width: "100%" }}
+          onChange={(e) => handleVideoTimelineChange(Number(e.target.value))}
         />
-        <span>{videoTimer}</span>
+        <span id="timer-progress"></span>
       </div>
     </div>
   );
