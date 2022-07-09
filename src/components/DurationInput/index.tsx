@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useClip } from "../../hooks/useClip";
-import { formatSecondsToTime } from "../../utils/SecondsToTimeFormat";
+import { parseSecondsToTime } from "../../utils/SecondsToTimeFormat";
 import * as S from "./styles";
 
 export function DurationInput() {
@@ -28,22 +28,6 @@ export function DurationInput() {
     }
   }, [videoInputDuration]);
 
-  function parseSecondsToTime() {
-    const timeObj = formatSecondsToTime(clipDuration);
-
-    let timeStr = "";
-    if (timeObj.hours > 0) {
-      timeStr = `${timeObj.hours.toString().padStart(2, "0")}:`;
-    }
-    if (timeObj.hours > 0 || timeObj.minutes > 0) {
-      timeStr += `${timeObj.minutes.toString().padStart(2, "0")}:${timeObj.seconds.toString().padStart(2, "0")}`;
-    } else {
-      timeStr = `${timeObj.seconds.toString().padStart(2, "0")} s`;
-    }
-
-    return timeStr;
-  }
-
   return (
     <S.Container>
       <S.DurationRange
@@ -58,7 +42,7 @@ export function DurationInput() {
         style={{ backgroundSize: `${(clipDuration * 100) / max}% 100%` }}
       />
       <S.SelectedDuration style={areInputsDisabled() ? { opacity: 0.7 } : {}}>
-        {clipDuration > 0 ? parseSecondsToTime() : 0}
+        {clipDuration > 0 ? parseSecondsToTime(clipDuration) : 0}
       </S.SelectedDuration>
     </S.Container>
   );

@@ -1,5 +1,9 @@
-import hexToRgba from "hex-to-rgba";
 import { useEffect, useRef, useState } from "react";
+import hexToRgba from "hex-to-rgba";
+import * as S from "./styles";
+import { Pause, Play, SpeakerSimpleHigh, SpeakerSimpleLow, SpeakerSimpleNone } from "phosphor-react";
+import { parseSecondsToTime } from "../../utils/SecondsToTimeFormat";
+import theme from "../../styles/theme";
 
 interface ClipPreviewProps {
   screenPlay: ScreenPlay;
@@ -38,6 +42,7 @@ export function ClipPreview({ screenPlay }: ClipPreviewProps) {
   // Set video related events
   useEffect(() => {
     if (!video) return;
+    changePlayButtonIcon();
 
     const onPlay = () => {
       if (timeoutTickingFrameRef) clearTimeout(timeoutTickingFrameRef);
@@ -47,6 +52,7 @@ export function ClipPreview({ screenPlay }: ClipPreviewProps) {
 
       audio?.play();
       videoOverlay?.play();
+      changePlayButtonIcon();
       processVideo(); // process the canvas
     };
     const onPause = () => {
@@ -54,6 +60,7 @@ export function ClipPreview({ screenPlay }: ClipPreviewProps) {
 
       audio?.pause();
       videoOverlay?.pause();
+      changePlayButtonIcon();
     };
 
     video.addEventListener("play", onPlay, false);
@@ -73,9 +80,13 @@ export function ClipPreview({ screenPlay }: ClipPreviewProps) {
     const currentTime = calculateCurrentTime();
 
     // Set timeline progress (range) and timer progress span values
-    document.getElementById("timer-progress")!.textContent = String(currentTime);
+    document.getElementById("timer-progress")!.textContent = `${parseSecondsToTime(currentTime)} / ${parseSecondsToTime(
+      screenPlay.duration
+    )}`;
+
     const timeline = document.getElementById("timeline-progress") as HTMLInputElement;
     timeline.value = String(currentTime);
+    timeline.style.backgroundSize = `${(parseFloat(timeline.value) * 100) / screenPlay.duration}% 100%`;
   }
 
   function resetPreview() {
@@ -95,24 +106,27 @@ export function ClipPreview({ screenPlay }: ClipPreviewProps) {
     const container = document.getElementById("invisible-medias-preview-container");
     const video = document.createElement("video");
     container?.appendChild(video);
-    video.src = URL.createObjectURL(screenPlay.videoInput.media);
     video.style.display = "none";
+    video.src = URL.createObjectURL(screenPlay.videoInput.media);
     video.volume = 0;
     video.load();
 
     const audio = document.createElement("audio");
     container?.appendChild(audio);
-    audio.src = URL.createObjectURL(screenPlay.audioInput.media);
     audio.style.display = "none";
+    audio.src = URL.createObjectURL(screenPlay.audioInput.media);
     audio.loop = true;
+    audio.volume = 0.5;
+    changeVolumeIcon(0.5);
+    document.getElementById("volume-control")!.style.backgroundSize = "50% 100%"; // reseting input range visual position
     audio.load();
 
     let videoOverlay: HTMLVideoElement | undefined;
     if (screenPlay.overlayFilter) {
       videoOverlay = document.createElement("video");
       container?.appendChild(videoOverlay);
-      videoOverlay.src = screenPlay.overlayFilter;
       videoOverlay.style.display = "none";
+      videoOverlay.src = screenPlay.overlayFilter;
       videoOverlay.volume = 0;
       videoOverlay.loop = true;
       videoOverlay.load();
@@ -121,6 +135,8 @@ export function ClipPreview({ screenPlay }: ClipPreviewProps) {
     const context = canvas!.getContext("2d")!;
     context.canvas.width = 640;
     context.canvas.height = 360;
+    context.fillStyle = theme.colors.secondary; // transparency
+    context.fillRect(0, 0, canvas!.width, canvas!.height);
 
     return { video, audio, videoOverlay };
   }
@@ -292,38 +308,97 @@ export function ClipPreview({ screenPlay }: ClipPreviewProps) {
     }
   }
 
+  function changePlayButtonIcon() {
+    const playIcon = document.getElementById("play-icon");
+    const pauseIcon = document.getElementById("pause-icon");
+
+    if (video!.paused) {
+      pauseIcon!.style.display = "none";
+      playIcon!.style.display = "block";
+    } else {
+      playIcon!.style.display = "none";
+      pauseIcon!.style.display = "block";
+    }
+  }
+  function changeVolumeIcon(volume: number) {
+    const highVolumeIcon = document.getElementById("volume-icon-high");
+    const lowVolumeIcon = document.getElementById("volume-icon-low");
+    const mutedVolumeIcon = document.getElementById("volume-icon-muted");
+
+    if (volume >= 0.5) {
+      highVolumeIcon!.style.display = "block";
+      lowVolumeIcon!.style.display = "none";
+      mutedVolumeIcon!.style.display = "none";
+    } else if (volume < 0.5 && volume > 0) {
+      highVolumeIcon!.style.display = "none";
+      lowVolumeIcon!.style.display = "block";
+      mutedVolumeIcon!.style.display = "none";
+    } else {
+      highVolumeIcon!.style.display = "none";
+      lowVolumeIcon!.style.display = "none";
+      mutedVolumeIcon!.style.display = "block";
+    }
+  }
+
+  // VIDEO CONTROLS
+  function handleTogglePlay() {
+    if (video!.paused) {
+      video!.play();
+    } else {
+      video!.pause();
+    }
+  }
+  function handleVolumeChange(volume: number) {
+    audio!.volume = volume;
+
+    const volumeInput = document.getElementById("volume-control") as HTMLInputElement;
+    volumeInput.style.backgroundSize = `${volume * 100}% 100%`;
+    changeVolumeIcon(volume);
+  }
+
   return (
-    <div>
+    <S.PreviewContainer>
+      {/* invisible-medias-preview-container is a container with all invisible media elements */}
       <div id="invisible-medias-preview-container"></div>
+
       <canvas ref={canvasRef} />
 
-      <div>
-        <button
-          onClick={() => {
-            if (video?.paused) video.play();
-          }}
-        >
-          PLAY
-        </button>
-        <button
-          onClick={() => {
-            if (!video?.paused) video?.pause();
-          }}
-        >
-          PAUSE
-        </button>
-
-        <input
+      {/* video preview controls */}
+      <S.VideoControlsContainer>
+        <S.TimelineInput
           id="timeline-progress"
           type="range"
           min={0}
           max={screenPlay.duration}
-          style={{ width: "100%" }}
           defaultValue="0"
           onChange={(e) => handleVideoTimelineChange(Number(e.target.value))}
         />
-        <span id="timer-progress">0</span>
-      </div>
-    </div>
+        <div>
+          <S.TogglePlayButton onClick={handleTogglePlay}>
+            <Play id="play-icon" weight="fill" />
+            <Pause id="pause-icon" style={{ display: "none" }} weight="fill" />
+          </S.TogglePlayButton>
+
+          <S.VolumeContainer>
+            <SpeakerSimpleHigh id="volume-icon-high" onClick={() => handleVolumeChange(0)} weight="fill" />
+            <SpeakerSimpleLow id="volume-icon-low" onClick={() => handleVolumeChange(0)} weight="fill" />
+            <SpeakerSimpleNone id="volume-icon-muted" onClick={() => handleVolumeChange(0.5)} weight="fill" />
+            <S.VolumeInput
+              id="volume-control"
+              type="range"
+              min={0}
+              max={1}
+              step={0.1}
+              defaultValue={0.5}
+              onChange={(e) => {
+                handleVolumeChange(Number(e.target.value));
+              }}
+            />
+          </S.VolumeContainer>
+
+          <S.VideoProgressTime id="timer-progress">0</S.VideoProgressTime>
+        </div>
+      </S.VideoControlsContainer>
+    </S.PreviewContainer>
   );
 }

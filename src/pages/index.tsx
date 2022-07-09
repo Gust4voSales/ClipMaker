@@ -8,7 +8,6 @@ import uploadAudioBG from "../assets/girl-listening.svg";
 import instructionsBG from "../assets/instructions.svg";
 import { audioExtensions, videoExtensions } from "../utils/AcceptedFileExtensions";
 import { DurationInput } from "../components/DurationInput";
-import { formatSecondsToTime } from "../utils/SecondsToTimeFormat";
 import Image from "next/image";
 import { ColorInput } from "../components/ColorInput";
 import { OverlayInput } from "../components/OverlayInput";
@@ -17,6 +16,7 @@ import { DisableableComponent } from "../styles/DisableableComponent";
 import { ClipPreview } from "../components/ClipPreview";
 import { ClipMaker } from "../utils/ClipMaker";
 import { useState } from "react";
+import { parseSecondsToTime } from "../utils/SecondsToTimeFormat";
 
 export default function Index2() {
   const {
@@ -38,13 +38,6 @@ export default function Index2() {
 
   function handleAudioUpload(audio: File) {
     setAudioInput(audio);
-  }
-
-  function parseSecondsToTime(totalSeconds: number) {
-    const timeObj = formatSecondsToTime(totalSeconds);
-    return `${timeObj.hours.toString().padStart(2, "0")}:${timeObj.minutes
-      .toString()
-      .padStart(2, "0")}:${timeObj.seconds.toString().padStart(2, "0")}`;
   }
 
   async function exportClip() {
