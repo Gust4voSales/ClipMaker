@@ -73,6 +73,10 @@ export function ClipProvider({ children }: ClipProviderProps) {
     };
   }, [audioInput]);
 
+  useEffect(() => {
+    if (!videoInput || !audioInput) setScreenPlay(null);
+  }, [videoInput, audioInput]);
+
   function generateClip() {
     console.table({
       video: `${videoInput?.name} - DURAÇÃO: ${videoInputDuration}s`,
