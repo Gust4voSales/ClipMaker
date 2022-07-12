@@ -164,12 +164,6 @@ export class ClipMaker {
   }
 
   private async addAudio(inputName: string) {
-    // ffmpeg.setProgress(({ ratio }) => {
-    //   console.log('progress -> ', ratio*100);
-    //   /*
-    //    * ratio is a float number between 0 to 1.
-    //    */
-    // })
     const input = `input_audio_file${this.audioExtension}`;
 
     ffmpeg.FS("writeFile", input, await fetchFile(this.audioInput));
