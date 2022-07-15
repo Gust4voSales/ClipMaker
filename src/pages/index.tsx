@@ -69,7 +69,7 @@ export default function Index() {
             <div>
               <Image src={instructionsBG} objectFit="contain" layout="responsive" />
             </div>
-            <span>Altere as configurações ao lado como desejar</span>
+            <span>Altere as configurações do seu clipe como desejar</span>
           </S.InstructionsContainer>
         )}
       </>

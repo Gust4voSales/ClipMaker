@@ -50,7 +50,7 @@ interface ContainerProps {
 }
 const Container = styled.div<ContainerProps>`
   height: 36rem;
-  width: 90%;
+  width: 100%;
   margin: 0 auto;
   border: 0.2rem dashed
     ${(props) =>
@@ -60,6 +60,10 @@ const Container = styled.div<ContainerProps>`
         ? props.theme.colors.success
         : props.theme.colors.error};
   border-radius: ${(props) => props.theme.spacing(0.5)};
+
+  @media (max-width: 1160px) {
+    height: 26rem;
+  }
 `;
 const Content = styled.div`
   display: flex;
