@@ -8,7 +8,7 @@ const ffmpeg = createFFmpeg({
   corePath: "https://unpkg.com/@ffmpeg/core@0.10.0/dist/ffmpeg-core.js",
 });
 
-export const loadFFMPEG = async () => {
+const loadFFMPEG = async () => {
   if (!ffmpeg.isLoaded()) await ffmpeg.load();
 };
 
@@ -101,6 +101,8 @@ export class ClipMaker {
   }
 
   async getVideoClip() {
+    await loadFFMPEG();
+
     let outputName = await this.cutClips();
 
     outputName = await this.addAudio(outputName);

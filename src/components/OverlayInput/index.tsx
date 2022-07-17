@@ -1,5 +1,5 @@
 import { Check, X } from "phosphor-react";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Popover } from "react-tiny-popover";
 import styled from "styled-components";
 import { useClip } from "../../hooks/useClip";
@@ -7,6 +7,7 @@ import { OVERLAYS } from "../../utils/Overlays";
 
 export function OverlayInput() {
   const { overlayFilterId, setOverlayFilterId, areInputsDisabled } = useClip();
+  const refer = useRef<HTMLElement | null>(null);
 
   const [isOpen, setIsOpen] = useState(false);
 
@@ -24,8 +25,9 @@ export function OverlayInput() {
   return (
     <Popover
       isOpen={isOpen}
-      positions={["left", "top"]} // if you'd like, you can limit the positions
-      reposition={false} // prevents automatic readjustment of content position that keeps your popover content within its parent's bounds
+      align="end"
+      positions={["left", "top", "right", "bottom"]} // if you'd like, you can limit the positions
+      reposition={true} // prevents automatic readjustment of content position that keeps your popover content within its parent's bounds
       onClickOutside={() => setIsOpen(false)} // handle click events outside of the popover/target here!
       content={() => (
         <Container>
@@ -71,8 +73,7 @@ const Container = styled.ul`
   row-gap: ${(props) => props.theme.spacing()};
   max-height: 30rem;
   overflow-y: auto;
-  margin-right: ${(props) => props.theme.spacing()};
-  margin-bottom: 120%;
+  margin: ${(props) => props.theme.spacing()};
 `;
 const OverlayContainer = styled.li`
   position: relative;

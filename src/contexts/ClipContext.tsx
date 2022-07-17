@@ -1,5 +1,5 @@
 import { createContext, Dispatch, ReactNode, SetStateAction, useEffect, useState } from "react";
-import { ClipMaker, loadFFMPEG } from "../utils/ClipMaker";
+import { ClipMaker } from "../utils/ClipMaker";
 
 export interface IClipContext {
   screenPlay: ScreenPlay | null;
@@ -40,10 +40,6 @@ export function ClipProvider({ children }: ClipProviderProps) {
   const [videoInputDuration, setVideoInputDuration] = useState(0);
   const [audioInputDuration, setAudioInputDuration] = useState(0);
 
-  useEffect(() => {
-    loadFFMPEG();
-  }, []);
-
   // Calculates the videoInput duration
   useEffect(() => {
     if (!videoInput) {
@@ -53,10 +49,10 @@ export function ClipProvider({ children }: ClipProviderProps) {
 
     const videoEl = document.createElement("video");
     videoEl.setAttribute("id", "video-input");
-    videoEl.setAttribute("src", URL.createObjectURL(videoInput));
     videoEl.ondurationchange = () => {
       setVideoInputDuration(Math.round(videoEl.duration));
     };
+    videoEl.setAttribute("src", URL.createObjectURL(videoInput));
   }, [videoInput]);
 
   // Calculates the audioInput duration
@@ -65,12 +61,13 @@ export function ClipProvider({ children }: ClipProviderProps) {
       setAudioInputDuration(0);
       return;
     }
+
     const audioEl = document.createElement("audio");
     audioEl.setAttribute("id", "audio-input");
-    audioEl.setAttribute("src", URL.createObjectURL(audioInput));
     audioEl.ondurationchange = () => {
       setAudioInputDuration(Math.round(audioEl.duration));
     };
+    audioEl.setAttribute("src", URL.createObjectURL(audioInput));
   }, [audioInput]);
 
   useEffect(() => {

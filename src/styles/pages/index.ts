@@ -153,3 +153,19 @@ export const GroupFields = styled.div`
 export const SubmitButton = styled(Button)`
   margin: ${(props) => props.theme.spacing(4)} auto ${(props) => props.theme.spacing()} auto;
 `;
+
+export const ExportText = styled.span`
+  font-size: 1.8rem;
+  font-weight: 500;
+  margin-right: ${(props) => props.theme.spacing(4)};
+`;
+
+export const ExportButton = styled(Button)`
+  background-color: transparent;
+  color: ${(props) => props.theme.colors.secondary};
+  transition: background-color 0.3s, color 0.3s;
+  &:hover {
+    background-color: ${(props) => props.theme.colors.secondary};
+    color: ${(props) => props.theme.colors.background};
+  }
+`;

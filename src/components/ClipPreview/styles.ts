@@ -4,7 +4,7 @@ export const PreviewContainer = styled.div`
   display: flex;
   flex-direction: column;
   max-width: fit-content;
-  margin-bottom: ${(props) => props.theme.spacing(3)};
+  margin-bottom: ${(props) => props.theme.spacing(2)};
 `;
 
 export const VideoControlsContainer = styled.div`

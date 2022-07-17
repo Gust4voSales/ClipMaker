@@ -51,7 +51,10 @@ export default function Index() {
       return (
         <>
           <ClipPreview screenPlay={screenPlay} />
-          <button onClick={exportClip}>EXPORTAR</button>
+          <div>
+            <S.ExportText>Gostou do resultado?</S.ExportText>
+            <S.ExportButton onClick={exportClip}>EXPORTAR</S.ExportButton>
+          </div>
         </>
       );
 

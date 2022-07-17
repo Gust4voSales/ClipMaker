@@ -18,6 +18,7 @@ export const GlobalTheme = createGlobalStyle`
       cursor: default !important;
       opacity: ${theme.disabledOpacity} !important;
       background-color: ${theme.colors.disabledBG} !important;
+      border-color: ${theme.colors.disabledBG} !important;
       color: ${theme.colors.disabledColor} !important;
 
       &:hover{ 
