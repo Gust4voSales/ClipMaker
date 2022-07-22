@@ -1,12 +1,11 @@
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import { Stepper } from "react-form-stepper";
 import Modal from "react-modal";
 import { ClipMaker } from "../ClipMaker";
 import { Loading } from "../components/Loading";
+import { Step, Stepper } from "../components/Stepper";
 import { useClip } from "../hooks/useClip";
 import * as S from "../styles/pages/export";
-import theme from "../styles/theme";
 
 export default function Export() {
   const router = useRouter();
@@ -15,14 +14,14 @@ export default function Export() {
   const [output, setOutput] = useState<string | null>(null);
   const [exportProgress, setExportProgress] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (!screenPlay) {
-      router.push("/");
-      return;
-    }
+  // useEffect(() => {
+  //   if (!screenPlay) {
+  //     router.push("/");
+  //     return;
+  //   }
 
-    exportClip();
-  }, []);
+  //   exportClip();
+  // }, []);
 
   async function exportClip() {
     console.log("export");
@@ -49,6 +48,11 @@ export default function Export() {
             <Loading />
           </S.LoadingContainer>
           <S.LoadingSpan>Esse processo pode demorar vários minutos. Tenha paciência</S.LoadingSpan>
+
+          <Stepper
+            steps={[{ label: "Primeiro passo" }, { label: "Segundo passo" }, { label: "Terceiro passo" }]}
+            current={1}
+          />
           {exportProgress && <span>{exportProgress}</span>}
           {output && <video src={output} controls></video>}
         </S.Container>

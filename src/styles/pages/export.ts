@@ -1,4 +1,3 @@
-import { Step } from "react-form-stepper";
 import styled from "styled-components";
 import theme from "../theme";
 
@@ -18,7 +17,7 @@ export const customModalStyles = {
 export const Container = styled.div`
   display: flex;
   flex-direction: column;
-  width: 40vw;
+  width: 50vw;
   height: 50vh;
   padding: ${(props) => props.theme.spacing(2)};
 `;
@@ -31,10 +30,4 @@ export const LoadingContainer = styled.div`
 export const LoadingSpan = styled.span`
   margin: ${(props) => props.theme.spacing(5)} auto auto auto;
   color: ${(props) => props.theme.colors.primary};
-`;
-
-export const CustomStep = styled(Step)`
-  background: blue !important;
-  width: 3rem !important;
-  height: 3rem !important;
 `;
