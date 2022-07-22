@@ -50,7 +50,13 @@ export default function Export() {
           <S.LoadingSpan>Esse processo pode demorar vários minutos. Tenha paciência</S.LoadingSpan>
 
           <Stepper
-            steps={[{ label: "Primeiro passo" }, { label: "Segundo passo" }, { label: "Terceiro passo" }]}
+            steps={[
+              { label: "Primeiro passo" },
+              { label: "Segundo passo" },
+              { label: "Terceiro passo" },
+              { label: "Quarto passo" },
+              { label: "Quinto passo" },
+            ]}
             current={1}
           />
           {exportProgress && <span>{exportProgress}</span>}

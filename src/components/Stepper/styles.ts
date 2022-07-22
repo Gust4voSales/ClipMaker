@@ -20,8 +20,18 @@ export const StepContainer = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  min-width: 14rem;
+  margin: 0 ${(props) => props.theme.spacing()};
+
+  &:first-child {
+    margin-left: 0;
+  }
+  &:last-child {
+    margin-right: 0;
+  }
+
   & > span {
+    white-space: nowrap;
+    max-width: min-content;
     margin-left: ${(props) => props.theme.spacing()};
   }
 `;
