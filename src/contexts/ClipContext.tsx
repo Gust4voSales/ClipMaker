@@ -1,5 +1,5 @@
 import { createContext, Dispatch, ReactNode, SetStateAction, useEffect, useState } from "react";
-import { ClipMaker } from "../utils/ClipMaker";
+import { ClipMaker } from "../ClipMaker";
 
 export interface IClipContext {
   screenPlay: ScreenPlay | null;

@@ -1,3 +1,4 @@
+import Link from "next/link";
 import styled from "styled-components";
 import { Button } from "../../components/Button";
 import { DisableableComponent } from "../DisableableComponent";
@@ -160,7 +161,7 @@ export const ExportText = styled.span`
   margin-right: ${(props) => props.theme.spacing(4)};
 `;
 
-export const ExportButton = styled(Button)`
+export const ExportButton = styled(Link)`
   background-color: transparent;
   color: ${(props) => props.theme.colors.secondary};
   transition: background-color 0.3s, color 0.3s;

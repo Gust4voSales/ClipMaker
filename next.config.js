@@ -1,13 +1,13 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  reactStrictMode: true,
+  reactStrictMode: false,
   compiler: {
     styledComponents: true,
   },
   async headers() {
     return [
       {
-        source: "/", // change to appropriate path
+        source: "/export", // change to appropriate path
         headers: [
           {
             key: "Cross-Origin-Embedder-Policy",

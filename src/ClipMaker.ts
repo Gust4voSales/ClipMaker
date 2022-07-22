@@ -1,16 +1,8 @@
-import { createFFmpeg, fetchFile } from "@ffmpeg/ffmpeg";
-import { getFileExtension } from "./FileExtension";
-import { OVERLAYS } from "./Overlays";
-import { randomInRange } from "./Random";
-
-const ffmpeg = createFFmpeg({
-  // log: true,
-  corePath: "https://unpkg.com/@ffmpeg/core@0.10.0/dist/ffmpeg-core.js",
-});
-
-const loadFFMPEG = async () => {
-  if (!ffmpeg.isLoaded()) await ffmpeg.load();
-};
+import { createFFmpeg, fetchFile, FFmpeg } from "@ffmpeg/ffmpeg";
+// import { this.ffmpeg, loadFFMPEG } from "./services/this.ffmpeg";
+import { getFileExtension } from "./utils/FileExtension";
+import { OVERLAYS } from "./utils/Overlays";
+import { randomInRange } from "./utils/Random";
 
 // interface ClipLength {
 //   min: number;
@@ -27,6 +19,10 @@ export class ClipMaker {
 
   outputClip: Uint8Array | null;
 
+  currentProgress: string | null;
+
+  ffmpeg: FFmpeg;
+
   static transitionDuration = 1;
 
   // TO-DO: ADAPT TO THE NEW SCREENPLAY FORMAT WHERE THE INPUTS ARE PASSED
@@ -40,6 +36,12 @@ export class ClipMaker {
     this.audioExtension = getFileExtension(audioName);
 
     this.screenPlay = screenPlay;
+
+    this.ffmpeg = createFFmpeg({
+      corePath: "https://unpkg.com/@ffmpeg/core@0.10.0/dist/ffmpeg-core.js",
+    });
+
+    this.currentProgress = null;
 
     this.outputClip = null;
   }
@@ -100,8 +102,17 @@ export class ClipMaker {
     return timeline;
   }
 
+  public getCurrentProgress() {
+    return this.currentProgress;
+  }
+
   async getVideoClip() {
-    await loadFFMPEG();
+    this.currentProgress = "Preparando tudo";
+    try {
+      await this.ffmpeg.load();
+    } catch (err) {
+      console.log("err >", err);
+    }
 
     let outputName = await this.cutClips();
 
@@ -111,22 +122,30 @@ export class ClipMaker {
 
     if (this.screenPlay.colorFilter) outputName = await this.addColorFilter(outputName);
 
-    this.outputClip = ffmpeg.FS("readFile", outputName);
+    this.currentProgress = "Finalizando";
+    this.outputClip = this.ffmpeg.FS("readFile", outputName);
 
+    this.currentProgress = "Tudo pronto";
+    try {
+      this.ffmpeg.exit();
+    } catch (err) {
+      console.log("exit >", err);
+    }
     return this.outputClip;
   }
 
   private async cutClips() {
+    this.currentProgress = "Cortando o vídeo";
     const input = `input_file${this.videoExtension}`;
 
-    ffmpeg.FS("writeFile", input, await fetchFile(this.videoInput));
+    this.ffmpeg.FS("writeFile", input, await fetchFile(this.videoInput));
 
     let concat_clips_array: any = [];
 
     // 1 sec video of black
     let black_transition_command = `-t ${ClipMaker.transitionDuration} -i ${input} -preset ultrafast -vf setsar=1,drawbox=t=fill:c=black black_transition${this.videoExtension}`;
 
-    await ffmpeg.run(...black_transition_command.split(" "));
+    await this.ffmpeg.run(...black_transition_command.split(" "));
 
     let index = 0;
 
@@ -140,7 +159,7 @@ export class ClipMaker {
         };
         const clipName = `clip_output${index.toString() + this.videoExtension}`;
 
-        await ffmpeg.run(
+        await this.ffmpeg.run(
           "-ss",
           clip.start.toString(),
           "-t",
@@ -159,41 +178,47 @@ export class ClipMaker {
 
     const outputName = `clips-output${this.videoExtension}`;
 
-    ffmpeg.FS("writeFile", "concat_clips.txt", concat_clips_array.join("\n"));
-    await ffmpeg.run("-f", "concat", "-i", "concat_clips.txt", "-map", "0:0", "-preset", "ultrafast", outputName);
+    this.ffmpeg.FS("writeFile", "concat_clips.txt", concat_clips_array.join("\n"));
+    await this.ffmpeg.run("-f", "concat", "-i", "concat_clips.txt", "-map", "0:0", "-preset", "ultrafast", outputName);
 
     return outputName;
   }
 
   private async addAudio(inputName: string) {
+    this.currentProgress = "Adicionando audio";
+
     const input = `input_audio_file${this.audioExtension}`;
 
-    ffmpeg.FS("writeFile", input, await fetchFile(this.audioInput));
+    this.ffmpeg.FS("writeFile", input, await fetchFile(this.audioInput));
     const outputName = `audio-output${this.videoExtension}`;
 
     let audio_command = `-i ${inputName} -stream_loop -1 -i ${input} -c copy -map 0:v -map 1:a -shortest -preset ultrafast ${outputName}`;
-    await ffmpeg.run(...audio_command.split(" "));
+    await this.ffmpeg.run(...audio_command.split(" "));
 
     return outputName;
   }
 
   private async addOverlayFilter(inputName: string) {
+    this.currentProgress = "Adicionando video de overlay";
+
     const overlayFileName = this.screenPlay.overlayFilter!.replace("/overlays/", "");
-    ffmpeg.FS("writeFile", overlayFileName, await fetchFile(this.screenPlay.overlayFilter!));
+    this.ffmpeg.FS("writeFile", overlayFileName, await fetchFile(this.screenPlay.overlayFilter!));
 
     const outputName = `filter_output${this.videoExtension}`;
     let overlayVideoCommand = `-i ${inputName} -stream_loop -1 -i ${overlayFileName} -t ${this.screenPlay.duration} -filter_complex [1][0]scale2ref=h=ow:w=iw[A][B];[A]format=argb,colorchannelmixer=aa=0.3[Btransparent];[B][Btransparent]overlay=(main_w-w):(main_h-h) -pix_fmt yuv420p -preset ultrafast ${outputName}`;
-    await ffmpeg.run(...overlayVideoCommand.split(" "));
+    await this.ffmpeg.run(...overlayVideoCommand.split(" "));
 
     return outputName;
   }
 
   private async addColorFilter(inputName: string) {
+    this.currentProgress = "Adicionando filtro de cor";
+
     const outputName = `color_filter_output${this.videoExtension}`;
 
     const colorFilterCommand = `-i ${inputName} -preset ultrafast -vf setsar=1,drawbox=t=fill:c=${this.screenPlay
       .colorFilter!}@0.05 ${outputName}`;
-    await ffmpeg.run(...colorFilterCommand.split(" "));
+    await this.ffmpeg.run(...colorFilterCommand.split(" "));
 
     return outputName;
   }

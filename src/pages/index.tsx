@@ -11,8 +11,6 @@ import { ColorInput } from "../components/ColorInput";
 import { OverlayInput } from "../components/OverlayInput";
 import { useClip } from "../hooks/useClip";
 import { ClipPreview } from "../components/ClipPreview";
-import { ClipMaker } from "../utils/ClipMaker";
-import { useState } from "react";
 import { parseSecondsToTime } from "../utils/SecondsToTimeFormat";
 import * as S from "../styles/pages/index";
 
@@ -28,7 +26,6 @@ export default function Index() {
     audioInputDuration,
     areInputsDisabled,
   } = useClip();
-  const [output, setOutput] = useState<string | null>(null);
 
   function handleVideoUpload(video: File) {
     setVideoInput(video);
@@ -38,14 +35,6 @@ export default function Index() {
     setAudioInput(audio);
   }
 
-  async function exportClip() {
-    const clipMaker = new ClipMaker(videoInput!, audioInput!, screenPlay!);
-
-    const videoData = await clipMaker.getVideoClip();
-    const url = URL.createObjectURL(new Blob([videoData!.buffer]));
-    setOutput(url);
-  }
-
   function renderLeftContainer() {
     if (screenPlay)
       return (
@@ -53,7 +42,7 @@ export default function Index() {
           <ClipPreview screenPlay={screenPlay} />
           <div>
             <S.ExportText>Gostou do resultado?</S.ExportText>
-            <S.ExportButton onClick={exportClip}>EXPORTAR</S.ExportButton>
+            <S.ExportButton href="/export">EXPORTAR</S.ExportButton>
           </div>
         </>
       );
@@ -139,8 +128,6 @@ export default function Index() {
           </S.Form>
         </S.RightContainer>
       </S.Container>
-
-      {output && <video src={output} controls></video>}
     </div>
   );
 }
