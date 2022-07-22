@@ -1,4 +1,4 @@
-import styled, { css } from "styled-components";
+import styled from "styled-components";
 
 const STEP_SIZE = 3;
 
@@ -7,11 +7,15 @@ export const Container = styled.div`
   justify-content: center;
 `;
 
-export const Separator = styled.div`
+interface SeparatorProps {
+  disabledConection: boolean;
+}
+export const Separator = styled.div<SeparatorProps>`
   width: 100%;
   max-width: 10rem;
-  height: 0.06rem;
-  background-color: ${(props) => props.theme.colors.primary};
+  height: 0.08rem;
+  background-color: ${({ theme, disabledConection }) =>
+    disabledConection ? theme.colors.disabledBG : theme.colors.primary};
   margin-top: ${STEP_SIZE / 2}rem;
 `;
 

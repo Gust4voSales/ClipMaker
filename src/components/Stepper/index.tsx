@@ -16,7 +16,7 @@ export function Stepper({ steps, current }: StepperProps) {
           <Step label={step.label} current={current === index} disabled={index > current}>
             {index < current ? <Check weight="bold" /> : index + 1}
           </Step>
-          {index < steps.length - 1 && <S.Separator />}
+          {index < steps.length - 1 && <S.Separator disabledConection={index >= current} />}
         </>
       ))}
     </S.Container>
