@@ -39,6 +39,16 @@ export default function Export() {
     clearInterval(progressInterval);
   }
 
+  function getScreenplaySteps() {
+    let steps = [{ label: "Preparando tudo" }, { label: "Cortando o vídeo" }, { label: "Adicionando audio" }];
+
+    if (screenPlay?.overlayFilter) steps.push({ label: "Adicionando video de overlay" });
+    steps.push({ label: "Adicionando video de overlay" });
+    if (screenPlay?.colorFilter) steps.push({ label: "Adicionando filtro de cor" });
+    steps.push({ label: "Adicionando filtro de cor" });
+    return steps;
+  }
+
   return (
     <div>
       <Modal isOpen={true} ariaHideApp={false} style={S.customModalStyles}>
@@ -49,16 +59,7 @@ export default function Export() {
           </S.LoadingContainer>
           <S.LoadingSpan>Esse processo pode demorar vários minutos. Tenha paciência</S.LoadingSpan>
 
-          <Stepper
-            steps={[
-              { label: "Primeiro passo" },
-              { label: "Segundo passo" },
-              { label: "Terceiro passo" },
-              { label: "Quarto passo" },
-              { label: "Quinto passo" },
-            ]}
-            current={1}
-          />
+          <Stepper steps={getScreenplaySteps()} current={2} />
           {exportProgress && <span>{exportProgress}</span>}
           {output && <video src={output} controls></video>}
         </S.Container>

@@ -25,7 +25,6 @@ export const StepContainer = styled.div`
   align-items: center;
   justify-content: center;
   margin: 0 ${(props) => props.theme.spacing()};
-
   &:first-child {
     margin-left: 0;
   }
@@ -34,8 +33,7 @@ export const StepContainer = styled.div`
   }
 
   & > span {
-    white-space: nowrap;
-    max-width: min-content;
+    max-width: 12rem;
     margin-left: ${(props) => props.theme.spacing()};
   }
 `;
