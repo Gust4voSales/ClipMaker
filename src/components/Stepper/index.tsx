@@ -12,12 +12,12 @@ export function Stepper({ steps, current }: StepperProps) {
   return (
     <S.Container>
       {steps.map((step, index) => (
-        <>
+        <React.Fragment key={step.label}>
           <Step label={step.label} current={current === index} disabled={index > current}>
             {index < current ? <Check weight="bold" /> : index + 1}
           </Step>
           {index < steps.length - 1 && <S.Separator disabledConection={index >= current} />}
-        </>
+        </React.Fragment>
       ))}
     </S.Container>
   );
@@ -29,7 +29,7 @@ interface StepProps {
   current: boolean;
   disabled: boolean;
 }
-export function Step({ label, children, current, disabled }: StepProps) {
+function Step({ label, children, current, disabled }: StepProps) {
   return (
     <S.StepContainer>
       <S.StepContent disabled={disabled}>{children}</S.StepContent>

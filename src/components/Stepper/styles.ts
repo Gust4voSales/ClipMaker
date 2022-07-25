@@ -11,12 +11,12 @@ interface SeparatorProps {
   disabledConection: boolean;
 }
 export const Separator = styled.div<SeparatorProps>`
+  margin: auto 0;
   width: 100%;
   max-width: 10rem;
   height: 0.08rem;
   background-color: ${({ theme, disabledConection }) =>
     disabledConection ? theme.colors.disabledBG : theme.colors.primary};
-  margin-top: ${STEP_SIZE / 2}rem;
 `;
 
 // STEP STYLES

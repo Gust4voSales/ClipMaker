@@ -19,7 +19,8 @@ export class ClipMaker {
 
   outputClip: Uint8Array | null;
 
-  currentProgress: string | null;
+  currentProgress: number | null;
+  progressStates: string[];
 
   ffmpeg: FFmpeg;
 
@@ -44,6 +45,7 @@ export class ClipMaker {
     this.currentProgress = null;
 
     this.outputClip = null;
+    this.progressStates = this.generateProgressStates();
   }
 
   /* This function returns an object with an array with the timeline (clips starting point and durations + black 
@@ -106,26 +108,42 @@ export class ClipMaker {
     return this.currentProgress;
   }
 
-  async getVideoClip() {
-    this.currentProgress = "Preparando tudo";
-    try {
-      await this.ffmpeg.load();
-    } catch (err) {
-      console.log("err >", err);
-    }
+  private generateProgressStates() {
+    let steps = ["Preparando tudo", "Cortando o vídeo", "Adicionando audio"];
 
+    if (this.screenPlay.overlayFilter) steps.push("Adicionando video de overlay");
+    if (this.screenPlay.colorFilter) steps.push("Adicionando filtro de cor");
+
+    steps.push("Finalizando");
+    return steps;
+  }
+
+  public getProgressStates() {
+    return this.progressStates;
+  }
+
+  async getVideoClip() {
+    this.currentProgress = 0;
+    await this.ffmpeg.load();
+
+    this.currentProgress += 1;
     let outputName = await this.cutClips();
 
+    this.currentProgress += 1;
     outputName = await this.addAudio(outputName);
 
-    if (this.screenPlay.overlayFilter) outputName = await this.addOverlayFilter(outputName);
+    if (this.screenPlay.overlayFilter) {
+      this.currentProgress += 1;
+      outputName = await this.addOverlayFilter(outputName);
+    }
+    if (this.screenPlay.colorFilter) {
+      this.currentProgress += 1;
+      outputName = await this.addColorFilter(outputName);
+    }
 
-    if (this.screenPlay.colorFilter) outputName = await this.addColorFilter(outputName);
-
-    this.currentProgress = "Finalizando";
+    this.currentProgress += 1;
     this.outputClip = this.ffmpeg.FS("readFile", outputName);
 
-    this.currentProgress = "Tudo pronto";
     try {
       this.ffmpeg.exit();
     } catch (err) {
@@ -135,7 +153,6 @@ export class ClipMaker {
   }
 
   private async cutClips() {
-    this.currentProgress = "Cortando o vídeo";
     const input = `input_file${this.videoExtension}`;
 
     this.ffmpeg.FS("writeFile", input, await fetchFile(this.videoInput));
@@ -185,8 +202,6 @@ export class ClipMaker {
   }
 
   private async addAudio(inputName: string) {
-    this.currentProgress = "Adicionando audio";
-
     const input = `input_audio_file${this.audioExtension}`;
 
     this.ffmpeg.FS("writeFile", input, await fetchFile(this.audioInput));
@@ -199,8 +214,6 @@ export class ClipMaker {
   }
 
   private async addOverlayFilter(inputName: string) {
-    this.currentProgress = "Adicionando video de overlay";
-
     const overlayFileName = this.screenPlay.overlayFilter!.replace("/overlays/", "");
     this.ffmpeg.FS("writeFile", overlayFileName, await fetchFile(this.screenPlay.overlayFilter!));
 
@@ -212,8 +225,6 @@ export class ClipMaker {
   }
 
   private async addColorFilter(inputName: string) {
-    this.currentProgress = "Adicionando filtro de cor";
-
     const outputName = `color_filter_output${this.videoExtension}`;
 
     const colorFilterCommand = `-i ${inputName} -preset ultrafast -vf setsar=1,drawbox=t=fill:c=${this.screenPlay

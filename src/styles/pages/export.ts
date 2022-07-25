@@ -31,3 +31,7 @@ export const LoadingSpan = styled.span`
   margin: ${(props) => props.theme.spacing(5)} auto auto auto;
   color: ${(props) => props.theme.colors.primary};
 `;
+
+export const OuputVideo = styled.video`
+  margin: auto;
+`;

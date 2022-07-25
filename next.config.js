@@ -7,7 +7,7 @@ const nextConfig = {
   async headers() {
     return [
       {
-        source: "/export", // change to appropriate path
+        source: "/", // change to appropriate path
         headers: [
           {
             key: "Cross-Origin-Embedder-Policy",

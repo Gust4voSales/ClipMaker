@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import Modal from "react-modal";
 import { ClipMaker } from "../ClipMaker";
 import { Loading } from "../components/Loading";
-import { Step, Stepper } from "../components/Stepper";
+import { Stepper } from "../components/Stepper";
 import { useClip } from "../hooks/useClip";
 import * as S from "../styles/pages/export";
 
@@ -12,41 +12,42 @@ export default function Export() {
   const { screenPlay, videoInput, audioInput } = useClip();
 
   const [output, setOutput] = useState<string | null>(null);
-  const [exportProgress, setExportProgress] = useState<string | null>(null);
+  const [clipMaker, setClipMaker] = useState<ClipMaker | null>(null);
+  const [exportProgress, setExportProgress] = useState(-1);
 
-  // useEffect(() => {
-  //   if (!screenPlay) {
-  //     router.push("/");
-  //     return;
-  //   }
+  useEffect(() => {
+    if (!screenPlay) {
+      router.push("/");
+      return;
+    }
 
-  //   exportClip();
-  // }, []);
+    exportClip();
+  }, []);
+
+  useEffect(() => {
+    if (!clipMaker) return;
+
+    const generateClip = async () => {
+      const progressInterval = setInterval(() => {
+        setExportProgress(clipMaker.getCurrentProgress()!);
+      }, 0);
+
+      // TRY CATCH MISSING (add error handling later)
+
+      const videoData = await clipMaker.getVideoClip();
+      const url = URL.createObjectURL(new Blob([videoData!.buffer]));
+
+      setOutput(url);
+      setExportProgress(clipMaker.getCurrentProgress()!);
+      clearInterval(progressInterval);
+    };
+
+    generateClip();
+  }, [clipMaker]);
 
   async function exportClip() {
     console.log("export");
-    const clipMaker = new ClipMaker(videoInput!, audioInput!, screenPlay!);
-
-    const progressInterval = setInterval(() => {
-      setExportProgress(clipMaker.getCurrentProgress());
-    }, 200);
-
-    const videoData = await clipMaker.getVideoClip();
-    const url = URL.createObjectURL(new Blob([videoData!.buffer]));
-
-    setOutput(url);
-    setExportProgress(null);
-    clearInterval(progressInterval);
-  }
-
-  function getScreenplaySteps() {
-    let steps = [{ label: "Preparando tudo" }, { label: "Cortando o vídeo" }, { label: "Adicionando audio" }];
-
-    if (screenPlay?.overlayFilter) steps.push({ label: "Adicionando video de overlay" });
-    steps.push({ label: "Adicionando video de overlay" });
-    if (screenPlay?.colorFilter) steps.push({ label: "Adicionando filtro de cor" });
-    steps.push({ label: "Adicionando filtro de cor" });
-    return steps;
+    setClipMaker(new ClipMaker(videoInput!, audioInput!, screenPlay!));
   }
 
   return (
@@ -54,14 +55,27 @@ export default function Export() {
       <Modal isOpen={true} ariaHideApp={false} style={S.customModalStyles}>
         <S.Container>
           <h1>Exportando</h1>
-          <S.LoadingContainer>
-            <Loading />
-          </S.LoadingContainer>
-          <S.LoadingSpan>Esse processo pode demorar vários minutos. Tenha paciência</S.LoadingSpan>
+          {!output ? (
+            <>
+              <S.LoadingContainer>
+                <Loading />
+              </S.LoadingContainer>
+              <S.LoadingSpan>Esse processo pode demorar vários minutos. Tenha paciência</S.LoadingSpan>
 
-          <Stepper steps={getScreenplaySteps()} current={2} />
-          {exportProgress && <span>{exportProgress}</span>}
-          {output && <video src={output} controls></video>}
+              {clipMaker && (
+                <>
+                  <Stepper
+                    steps={clipMaker?.getProgressStates().map((s) => {
+                      return { label: s };
+                    })}
+                    current={exportProgress}
+                  />
+                </>
+              )}
+            </>
+          ) : (
+            <S.OuputVideo width={300} controls src={output}></S.OuputVideo>
+          )}
         </S.Container>
       </Modal>
     </div>
