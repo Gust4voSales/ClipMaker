@@ -322,6 +322,11 @@
   resolved "https://registry.yarnpkg.com/@rushstack/eslint-patch/-/eslint-patch-1.0.8.tgz#be3e914e84eacf16dbebd311c0d0b44aa1174c64"
   integrity sha512-ZK5v4bJwgXldAUA8r3q9YKfCwOqoHTK/ZqRjSeRXQrBXWouoPnS4MQtgC4AXGiiBuUu5wxrRgTlv0ktmM4P1Aw==
 
+"@types/ffmpeg@^1.0.4":
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/@types/ffmpeg/-/ffmpeg-1.0.4.tgz#e82c080f7846de13e17bf0a2d49dd841651b8686"
+  integrity sha512-USbiJIZRuoO1n/HUTkxCPH0hvjVUOLUbkicwbh+9GOjwg0IFZOU0aDVMJV0A27nC42Bx6rujunU6pfdjw866JQ==
+
 "@types/hoist-non-react-statics@*":
   version "3.3.1"
   resolved "https://registry.yarnpkg.com/@types/hoist-non-react-statics/-/hoist-non-react-statics-3.3.1.tgz#1124aafe5118cb591977aeb1ceaaed1070eb039f"
@@ -609,6 +614,11 @@ chalk@^4.0.0:
   dependencies:
     ansi-styles "^4.1.0"
     supports-color "^7.1.0"
+
+clsx@^1.1.1:
+  version "1.2.1"
+  resolved "https://registry.yarnpkg.com/clsx/-/clsx-1.2.1.tgz#0ddc4a20a549b59c93a4116bb26f5294ca17dc12"
+  integrity sha512-EcR6r5a8bj6pu3ycsa/E/cKVGuTgZJZdsyUYHOksG/UHIiKfjxzRxYJpyVBwYaQeOvghal9fcc4PidlgzugAQg==
 
 color-convert@^1.9.0:
   version "1.9.3"
@@ -1785,6 +1795,13 @@ react-tiny-popover@^7.0.1:
   version "7.0.1"
   resolved "https://registry.yarnpkg.com/react-tiny-popover/-/react-tiny-popover-7.0.1.tgz#efb396cae335f00a0767ad98b9579d28744aec9e"
   integrity sha512-uV+nTZXkCtfPFQtoKwbfX8waaU7+b8LEOoyOUjtmRxqnH3KLX1FkPm7RU+RC8eXxtOe4rC1cuhOIbQFcc71vQQ==
+
+react-toastify@^9.0.8:
+  version "9.0.8"
+  resolved "https://registry.yarnpkg.com/react-toastify/-/react-toastify-9.0.8.tgz#3876c89fc6211a29027b3075010b5ec39ebe4f7e"
+  integrity sha512-EwM+teWt49HSHx+67qI08yLAW1zAsBxCXLCsUfxHYv1W7/R3ZLhrqKalh7j+kjgPna1h5LQMSMwns4tB4ww2yQ==
+  dependencies:
+    clsx "^1.1.1"
 
 react@18.0.0:
   version "18.0.0"

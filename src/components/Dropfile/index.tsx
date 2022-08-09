@@ -1,7 +1,8 @@
 import Image from "next/image";
 import { FileX } from "phosphor-react";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { Accept, useDropzone } from "react-dropzone";
+import { toast } from "react-toastify";
 import styled from "styled-components";
 
 interface DropfileProps {
@@ -11,20 +12,20 @@ interface DropfileProps {
   onUpload: (file: File) => void;
 }
 export function Dropfile({ acceptedExtensions, backgroundImg, dropfileDragMessage, onUpload }: DropfileProps) {
-  const { getInputProps, getRootProps, isDragActive, isDragReject, acceptedFiles } = useDropzone({
+  const { getInputProps, getRootProps, isDragActive, isDragReject, acceptedFiles, fileRejections } = useDropzone({
     accept: acceptedExtensions,
     multiple: false,
   });
 
-  const [entity, setEntity] = useState("");
-
-  useEffect(() => {
-    setEntity(dropfileDragMessage.split(" ")[dropfileDragMessage.split(" ").length - 1]);
-  }, [dropfileDragMessage]);
+  const entity = dropfileDragMessage.split(" ")[dropfileDragMessage.split(" ").length - 1];
 
   useEffect(() => {
     if (acceptedFiles.length > 0) onUpload(acceptedFiles[0]);
   }, [acceptedFiles]);
+
+  useEffect(() => {
+    if (fileRejections.length) toast.error("Formato de arquivo não suportado");
+  }, [fileRejections]);
 
   return (
     <Container {...getRootProps()} state={!isDragActive ? "neutral" : isDragReject ? "reject" : "success"}>

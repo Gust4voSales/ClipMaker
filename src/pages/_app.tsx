@@ -3,6 +3,8 @@ import Head from "next/head";
 import { ThemeProvider } from "styled-components";
 import { ClipProvider } from "../contexts/ClipContext";
 import { GlobalTheme } from "../styles/GlobalStyles";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import theme from "../styles/theme";
 
 function MyApp({ Component, pageProps }: AppProps) {
@@ -16,6 +18,7 @@ function MyApp({ Component, pageProps }: AppProps) {
       <ThemeProvider theme={theme}>
         <ClipProvider>
           <Component {...pageProps} />
+          <ToastContainer />
         </ClipProvider>
       </ThemeProvider>
     </>

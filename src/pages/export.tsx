@@ -21,6 +21,19 @@ export default function Export() {
       return;
     }
 
+    // fetch("/api/hello")
+    //   .then(function (response) {
+    //     console.log(response);
+    //     const video = new FileReader();
+
+    //     // response.json().then(function (data) {
+    //     //   console.log(data);
+    //     // });
+    //   })
+    //   .catch(function (err) {
+    //     console.error("Failed retrieving information", err);
+    //   });
+
     exportClip();
   }, []);
 
