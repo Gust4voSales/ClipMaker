@@ -22,6 +22,16 @@ export const Container = styled.div`
   padding: ${(props) => props.theme.spacing(2)};
 `;
 
+export const Header = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+`;
+
+export const Back = styled.a`
+  color: ${(props) => props.theme.colors.secondary};
+`;
+
 export const LoadingContainer = styled.div`
   height: 30%;
   /* background-color: red; */

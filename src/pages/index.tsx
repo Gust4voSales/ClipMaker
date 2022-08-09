@@ -13,6 +13,7 @@ import { useClip } from "../hooks/useClip";
 import { ClipPreview } from "../components/ClipPreview";
 import { parseSecondsToTime } from "../utils/SecondsToTimeFormat";
 import * as S from "../styles/pages/index";
+import Link from "next/link";
 
 export default function Index() {
   const {
@@ -42,7 +43,9 @@ export default function Index() {
           <ClipPreview screenPlay={screenPlay} />
           <div>
             <S.ExportText>Gostou do resultado?</S.ExportText>
-            <S.ExportButton href="/export">EXPORTAR</S.ExportButton>
+            <Link href="/export">
+              <S.ExportButton>EXPORTAR</S.ExportButton>
+            </Link>
           </div>
         </>
       );

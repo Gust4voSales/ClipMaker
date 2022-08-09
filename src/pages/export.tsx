@@ -5,7 +5,9 @@ import { ClipMaker } from "../ClipMaker";
 import { Loading } from "../components/Loading";
 import { Stepper } from "../components/Stepper";
 import { useClip } from "../hooks/useClip";
+import { toast } from "react-toastify";
 import * as S from "../styles/pages/export";
+import Link from "next/link";
 
 export default function Export() {
   const router = useRouter();
@@ -32,13 +34,16 @@ export default function Export() {
         setExportProgress(clipMaker.getCurrentProgress()!);
       }, 0);
 
-      // TRY CATCH MISSING (add error handling later)
+      try {
+        const videoData = await clipMaker.getVideoClip();
+        const url = URL.createObjectURL(new Blob([videoData!.buffer]));
 
-      const videoData = await clipMaker.getVideoClip();
-      const url = URL.createObjectURL(new Blob([videoData!.buffer]));
-
-      setOutput(url);
-      setExportProgress(clipMaker.getCurrentProgress()!);
+        setOutput(url);
+        setExportProgress(clipMaker.getCurrentProgress()!);
+      } catch (err) {
+        console.log(err);
+        toast.error("Ocorreu um problema ao tentar exportar o vídeo. Tente novamente.", { autoClose: false });
+      }
       clearInterval(progressInterval);
     };
 
@@ -58,7 +63,13 @@ export default function Export() {
     <div>
       <Modal isOpen={true} ariaHideApp={false} style={S.customModalStyles}>
         <S.Container>
-          <h1>Exportando</h1>
+          <S.Header>
+            <h1>Exportando</h1>
+
+            <Link prefetch href="/" passHref>
+              <S.Back>Voltar</S.Back>
+            </Link>
+          </S.Header>
           {!output ? (
             <>
               <S.LoadingContainer>
