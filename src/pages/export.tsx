@@ -21,19 +21,6 @@ export default function Export() {
       return;
     }
 
-    // fetch("/api/hello")
-    //   .then(function (response) {
-    //     console.log(response);
-    //     const video = new FileReader();
-
-    //     // response.json().then(function (data) {
-    //     //   console.log(data);
-    //     // });
-    //   })
-    //   .catch(function (err) {
-    //     console.error("Failed retrieving information", err);
-    //   });
-
     exportClip();
   }, []);
 
@@ -56,6 +43,10 @@ export default function Export() {
     };
 
     generateClip();
+
+    return () => {
+      clipMaker.exitFFMPEG();
+    };
   }, [clipMaker]);
 
   async function exportClip() {
@@ -87,7 +78,7 @@ export default function Export() {
               )}
             </>
           ) : (
-            <S.OuputVideo width={300} controls src={output}></S.OuputVideo>
+            <S.OuputVideo width="auto" height={200} controls src={output}></S.OuputVideo>
           )}
         </S.Container>
       </Modal>

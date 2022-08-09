@@ -109,7 +109,7 @@ export class ClipMaker {
   }
 
   private generateProgressStates() {
-    let steps = ["Preparando tudo", "Cortando o vídeo", "Adicionando audio"];
+    let steps = ["Cortando o vídeo", "Adicionando audio"];
 
     if (this.screenPlay.overlayFilter) steps.push("Adicionando video de overlay");
     if (this.screenPlay.colorFilter) steps.push("Adicionando filtro de cor");
@@ -122,11 +122,18 @@ export class ClipMaker {
     return this.progressStates;
   }
 
+  public exitFFMPEG() {
+    try {
+      this.ffmpeg.exit();
+    } catch (err) {
+      console.log("exit >", err);
+    }
+  }
+
   async getVideoClip() {
-    this.currentProgress = 0;
     await this.ffmpeg.load();
 
-    this.currentProgress += 1;
+    this.currentProgress = 0;
     let outputName = await this.cutClips();
 
     this.currentProgress += 1;
@@ -144,11 +151,7 @@ export class ClipMaker {
     this.currentProgress += 1;
     this.outputClip = this.ffmpeg.FS("readFile", outputName);
 
-    try {
-      this.ffmpeg.exit();
-    } catch (err) {
-      console.log("exit >", err);
-    }
+    this.exitFFMPEG();
     return this.outputClip;
   }
 
