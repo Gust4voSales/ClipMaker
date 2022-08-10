@@ -13,7 +13,7 @@ export default function Export() {
   const router = useRouter();
   const { screenPlay, videoInput, audioInput } = useClip();
 
-  const [output, setOutput] = useState<string | null>(null);
+  const [ouputURL, setOuputURL] = useState<string | null>(null);
   const [clipMaker, setClipMaker] = useState<ClipMaker | null>(null);
   const [exportProgress, setExportProgress] = useState(-1);
 
@@ -36,13 +36,15 @@ export default function Export() {
 
       try {
         const videoData = await clipMaker.getVideoClip();
-        const url = URL.createObjectURL(new Blob([videoData!.buffer]));
+        const url = URL.createObjectURL(new Blob([videoData!.buffer], { type: "video/mp4" }));
 
-        setOutput(url);
+        setOuputURL(url);
         setExportProgress(clipMaker.getCurrentProgress()!);
       } catch (err) {
         console.log(err);
-        toast.error("Ocorreu um problema ao tentar exportar o vídeo. Tente novamente.", { autoClose: false });
+        toast.error("Ocorreu um problema ao tentar exportar o vídeo. Atualize a página e tente novamente.", {
+          autoClose: false,
+        });
       }
       clearInterval(progressInterval);
     };
@@ -51,11 +53,11 @@ export default function Export() {
 
     return () => {
       clipMaker.exitFFMPEG();
+      toast.dismiss();
     };
   }, [clipMaker]);
 
   async function exportClip() {
-    console.log("export");
     setClipMaker(new ClipMaker(videoInput!, audioInput!, screenPlay!));
   }
 
@@ -70,26 +72,32 @@ export default function Export() {
               <S.Back>Voltar</S.Back>
             </Link>
           </S.Header>
-          {!output ? (
+
+          {ouputURL ? (
+            <S.OutputContainer>
+              <video src={ouputURL} height={160} width="auto" controls />
+              <S.OutputLink href={ouputURL} download>
+                BAIXAR
+              </S.OutputLink>
+            </S.OutputContainer>
+          ) : (
             <>
               <S.LoadingContainer>
                 <Loading />
               </S.LoadingContainer>
               <S.LoadingSpan>Esse processo pode demorar vários minutos. Tenha paciência</S.LoadingSpan>
-
-              {clipMaker && (
-                <>
-                  <Stepper
-                    steps={clipMaker?.getProgressStates().map((s) => {
-                      return { label: s };
-                    })}
-                    current={exportProgress}
-                  />
-                </>
-              )}
             </>
-          ) : (
-            <S.OuputVideo width="auto" height={200} controls src={output}></S.OuputVideo>
+          )}
+
+          {clipMaker && (
+            <>
+              <Stepper
+                steps={clipMaker?.getProgressStates().map((s) => {
+                  return { label: s };
+                })}
+                current={ouputURL ? exportProgress + 1 : exportProgress}
+              />
+            </>
           )}
         </S.Container>
       </Modal>

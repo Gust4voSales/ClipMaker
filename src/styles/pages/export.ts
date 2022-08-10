@@ -45,3 +45,27 @@ export const LoadingSpan = styled.span`
 export const OuputVideo = styled.video`
   margin: auto;
 `;
+
+export const OutputContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+`;
+
+export const OutputLink = styled.a`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22rem;
+  height: 4rem;
+  background-color: ${(props) => props.theme.colors.secondary};
+  color: ${(props) => props.theme.colors.background};
+  border: 0.2rem solid ${(props) => props.theme.colors.secondary};
+  border-radius: ${(props) => props.theme.spacing(0.5)};
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.1rem;
+  margin-top: ${(props) => props.theme.spacing(2)};
+`;
