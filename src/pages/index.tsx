@@ -12,8 +12,11 @@ import { OverlayInput } from "../components/OverlayInput";
 import { useClip } from "../hooks/useClip";
 import { ClipPreview } from "../components/ClipPreview";
 import { parseSecondsToTime } from "../utils/SecondsToTimeFormat";
-import * as S from "../styles/pages/index";
+import { isDesktop, isChrome, isEdge } from "react-device-detect";
 import Link from "next/link";
+import * as S from "../styles/pages/index";
+import { useEffect } from "react";
+import { toast } from "react-toastify";
 
 export default function Index() {
   const {
@@ -27,6 +30,20 @@ export default function Index() {
     audioInputDuration,
     areInputsDisabled,
   } = useClip();
+
+  useEffect(() => {
+    if (!isDesktop) {
+      toast.warning(
+        "Seu dispositivo pode não ser compatível com a tecnologia de geração de vídeo do ClipMaker. Utilize em um navegador desktop como o Google Chrome ou Edge se tiver problemas.",
+        { autoClose: false }
+      );
+    } else if (!(isChrome || isEdge)) {
+      toast.warning(
+        "Seu navegador pode não ser compatível com a tecnologia de geração de vídeo do ClipMaker. Utilize o Google Chrome ou Edge se tiver problemas.",
+        { autoClose: false }
+      );
+    }
+  }, []);
 
   function handleVideoUpload(video: File) {
     setVideoInput(video);

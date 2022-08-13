@@ -42,9 +42,12 @@ export default function Export() {
         setExportProgress(clipMaker.getCurrentProgress()!);
       } catch (err) {
         console.log(err);
-        toast.error("Ocorreu um problema ao tentar exportar o vídeo. Atualize a página e tente novamente.", {
+        toast.error("Ocorreu um problema ao tentar exportar o vídeo. Tente novamente.", {
           autoClose: false,
         });
+        setTimeout(() => {
+          router.push("/");
+        }, 200);
       }
       clearInterval(progressInterval);
     };
@@ -53,7 +56,6 @@ export default function Export() {
 
     return () => {
       clipMaker.exitFFMPEG();
-      toast.dismiss();
     };
   }, [clipMaker]);
 
