@@ -208,7 +208,7 @@ export function ClipPreview({ screenPlay }: ClipPreviewProps) {
     if (!isTransition) videoPlaybackPosition = video!.currentTime;
 
     showVideoFrame();
-    showCurrentClipHelper();
+    // showCurrentClipHelper();
 
     timeoutTickingFrameRef = setTimeout(() => {
       processVideo();
