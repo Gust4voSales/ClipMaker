@@ -6,6 +6,7 @@ import { GlobalTheme } from "../styles/GlobalStyles";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import theme from "../styles/theme";
+import { Footer } from "../components/Footer";
 
 function MyApp({ Component, pageProps }: AppProps) {
   return (
@@ -18,6 +19,7 @@ function MyApp({ Component, pageProps }: AppProps) {
       <ThemeProvider theme={theme}>
         <ClipProvider>
           <Component {...pageProps} />
+          <Footer />
           <ToastContainer />
         </ClipProvider>
       </ThemeProvider>

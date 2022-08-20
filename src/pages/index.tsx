@@ -91,6 +91,13 @@ export default function Index() {
   return (
     <div>
       <S.Title>Criar clipe</S.Title>
+      <S.YoutubeContainer>
+        Exemplos de clipes no{" "}
+        <a rel="noreferrer noopener" target="_blank" href="https://www.youtube.com/channel/UCCM9c0yK540DP9E2jfKZwBg">
+          canal do Youtube
+        </a>
+      </S.YoutubeContainer>
+
       <S.Container>
         <S.LeftContainer>{renderLeftContainer()}</S.LeftContainer>
         <S.RightContainer>

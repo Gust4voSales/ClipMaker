@@ -4,6 +4,18 @@ import { DisableableComponent } from "../DisableableComponent";
 
 export const Title = styled.h1``;
 
+export const YoutubeContainer = styled.div`
+  position: absolute;
+  top: 0;
+  right: 0;
+  font-size: 1.4rem;
+  padding: ${(props) => props.theme.spacing(1)} ${(props) => props.theme.spacing(3)};
+  & > a {
+    color: ${(props) => props.theme.colors.primary};
+    font-size: 1.4rem;
+  }
+`;
+
 export const Container = styled.div`
   display: flex;
   justify-content: space-between;

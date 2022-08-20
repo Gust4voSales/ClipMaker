@@ -32,6 +32,7 @@ export const GlobalTheme = createGlobalStyle`
   html, body {
     height: 100%;
     scroll-behavior: smooth;
+    overflow-x: hidden;
 
     background: ${theme.colors.background};
     color: ${theme.colors.textPrimary};
@@ -40,7 +41,7 @@ export const GlobalTheme = createGlobalStyle`
   body {
     padding: ${theme.spacing()} ${theme.spacing(2)};
   }
-  
+
   h1 {
     font-size: 3.2rem;
   }

@@ -8,6 +8,7 @@ import { useClip } from "../hooks/useClip";
 import { toast } from "react-toastify";
 import * as S from "../styles/pages/export";
 import Link from "next/link";
+import { Footer } from "../components/Footer";
 
 export default function Export() {
   const router = useRouter();
@@ -102,6 +103,7 @@ export default function Export() {
             </>
           )}
         </S.Container>
+        <Footer />
       </Modal>
     </div>
   );
