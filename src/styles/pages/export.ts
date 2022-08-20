@@ -20,6 +20,7 @@ export const Container = styled.div`
   width: 50vw;
   height: 50vh;
   padding: ${(props) => props.theme.spacing(2)};
+  padding-bottom: ${(props) => props.theme.spacing(4)};
 `;
 
 export const Header = styled.div`
