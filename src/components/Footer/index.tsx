@@ -2,7 +2,7 @@ import styled from "styled-components";
 
 export function Footer() {
   return (
-    <Container style={{ position: "absolute", bottom: 0 }}>
+    <Container>
       <Text>
         Criado por{" "}
         <Link rel="noreferrer noopener" target="_blank" href="https://www.linkedin.com/in/gust4vo-sales/">
@@ -15,12 +15,13 @@ export function Footer() {
 }
 
 const Container = styled.div`
-  position: absolute;
-  bottom: 0;
+  position: sticky;
   width: 100%;
   display: flex;
   justify-content: center;
-  padding-bottom: ${(props) => props.theme.spacing()};
+  align-items: center;
+  padding: ${(props) => props.theme.spacing()} 0;
+  margin-top: ${(props) => props.theme.spacing(3)};
 `;
 
 const Text = styled.span`

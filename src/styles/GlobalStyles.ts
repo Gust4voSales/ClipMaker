@@ -32,7 +32,6 @@ export const GlobalTheme = createGlobalStyle`
   html, body {
     height: 100%;
     scroll-behavior: smooth;
-    overflow-x: hidden;
 
     background: ${theme.colors.background};
     color: ${theme.colors.textPrimary};

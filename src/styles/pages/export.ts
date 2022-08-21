@@ -1,31 +1,41 @@
 import styled from "styled-components";
 import theme from "../theme";
 
-export const customModalStyles = {
-  content: {
-    margin: "auto",
-    width: "fit-content",
-    height: "fit-content",
-    borderRadius: theme.spacing(0.5),
-    padding: 0,
-  },
-  overlay: {
-    backgroundColor: theme.colors.background,
-  },
-};
-
 export const Container = styled.div`
+  background-color: ${(props) => props.theme.colors.background};
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  /* width: 100vw; */
+  max-width: 100%;
+  overflow-x: hidden;
+`;
+
+export const Content = styled.div`
   display: flex;
   flex-direction: column;
   width: 50vw;
+  align-items: center;
   height: 50vh;
   padding: ${(props) => props.theme.spacing(2)};
-  padding-bottom: ${(props) => props.theme.spacing(4)};
+  background-color: #fff;
+  border: 0.1rem solid ${(props) => props.theme.colors.disabledBG};
+  border-radius: ${(props) => props.theme.spacing(0.5)};
+
+  @media (max-width: 760px) {
+    width: 100%;
+    height: 46vh;
+
+    padding: ${(props) => props.theme.spacing(1)};
+  }
 `;
 
 export const Header = styled.div`
   display: flex;
   justify-content: space-between;
+  width: 100%;
   align-items: center;
 `;
 
@@ -35,12 +45,12 @@ export const Back = styled.a`
 
 export const LoadingContainer = styled.div`
   height: 30%;
-  /* background-color: red; */
 `;
 
 export const LoadingSpan = styled.span`
   margin: ${(props) => props.theme.spacing(5)} auto auto auto;
   color: ${(props) => props.theme.colors.primary};
+  text-align: center;
 `;
 
 export const OuputVideo = styled.video`

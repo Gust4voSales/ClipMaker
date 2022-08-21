@@ -16,7 +16,7 @@ export default function Export() {
 
   const [ouputURL, setOuputURL] = useState<string | null>(null);
   const [clipMaker, setClipMaker] = useState<ClipMaker | null>(null);
-  const [exportProgress, setExportProgress] = useState(-1);
+  const [exportProgress, setExportProgress] = useState(4);
 
   useEffect(() => {
     if (!screenPlay) {
@@ -66,8 +66,8 @@ export default function Export() {
 
   return (
     <div>
-      <Modal isOpen={true} ariaHideApp={false} style={S.customModalStyles}>
-        <S.Container>
+      <S.Container>
+        <S.Content>
           <S.Header>
             <h1>Exportando</h1>
 
@@ -95,16 +95,16 @@ export default function Export() {
           {clipMaker && (
             <>
               <Stepper
-                steps={clipMaker?.getProgressStates().map((s) => {
+                steps={clipMaker.getProgressStates().map((s) => {
                   return { label: s };
                 })}
                 current={ouputURL ? exportProgress + 1 : exportProgress}
               />
             </>
           )}
-        </S.Container>
+        </S.Content>
         <Footer />
-      </Modal>
+      </S.Container>
     </div>
   );
 }

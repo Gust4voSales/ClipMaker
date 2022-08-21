@@ -19,7 +19,6 @@ function MyApp({ Component, pageProps }: AppProps) {
       <ThemeProvider theme={theme}>
         <ClipProvider>
           <Component {...pageProps} />
-          <Footer />
           <ToastContainer />
         </ClipProvider>
       </ThemeProvider>

@@ -2,18 +2,13 @@ import styled from "styled-components";
 import { Button } from "../../components/Button";
 import { DisableableComponent } from "../DisableableComponent";
 
-export const Title = styled.h1``;
-
-export const YoutubeContainer = styled.div`
-  position: absolute;
-  top: 0;
-  right: 0;
-  font-size: 1.4rem;
-  padding: ${(props) => props.theme.spacing(1)} ${(props) => props.theme.spacing(3)};
-  & > a {
-    color: ${(props) => props.theme.colors.primary};
-    font-size: 1.4rem;
-  }
+export const Header = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+`;
+export const Title = styled.h1`
+  white-space: nowrap;
 `;
 
 export const Container = styled.div`

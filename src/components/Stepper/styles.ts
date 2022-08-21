@@ -4,7 +4,12 @@ const STEP_SIZE = 3;
 
 export const Container = styled.div`
   display: flex;
-  justify-content: center;
+  align-self: center;
+  overflow-x: auto;
+  width: fit-content;
+  @media (max-width: 760px) {
+    width: 100%;
+  }
 `;
 
 interface SeparatorProps {
@@ -14,6 +19,7 @@ export const Separator = styled.div<SeparatorProps>`
   margin: auto 0;
   width: 100%;
   max-width: 10rem;
+  min-width: 2rem;
   height: 0.08rem;
   background-color: ${({ theme, disabledConection }) =>
     disabledConection ? theme.colors.disabledBG : theme.colors.primary};
