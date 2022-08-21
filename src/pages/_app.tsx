@@ -12,6 +12,15 @@ function MyApp({ Component, pageProps }: AppProps) {
   return (
     <>
       <Head>
+        <title>Clip Maker - Gerador de Clips</title>
+        <meta name="description" content="Crie clipes com apenas alguns clicks. Clips LOFI, AMVs, montagens etc" />
+        <meta property="og:title" content="Clip Maker - Gerador de Clips" />
+        <meta
+          property="og:description"
+          content="Crie clipes com apenas alguns clicks. Clips LOFI, AMVs, montagens etc"
+        />
+        <meta property="og:url" content="https://clip-maker.vercel.app/" />
+        <meta property="og:type" content="website" />
         <meta name="viewport" content="initial-scale=1, width=device-width" />
       </Head>
 
