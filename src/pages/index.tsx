@@ -18,6 +18,7 @@ import * as S from "../styles/pages/index";
 import { useEffect } from "react";
 import { toast } from "react-toastify";
 import { Footer } from "../components/Footer";
+import { ExamplesModal } from "../components/ExamplesModal";
 
 export default function Index() {
   const {
@@ -93,6 +94,7 @@ export default function Index() {
     <div>
       <S.Header>
         <S.Title>Criar clipe</S.Title>
+        <ExamplesModal />
       </S.Header>
 
       <S.Container>
