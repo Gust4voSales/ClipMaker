@@ -1,34 +1,25 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+<h1 align="center">
+ClipMaker
+</h1>
 
-## Getting Started
+<p align="center">Website that automates videoclips editing with only a few clicks</p>
+👉Check it out: https://clip-maker.vercel.app/
 
-First, run the development server:
+## 📜 About
+The user uploads a video and an audio, sets the duration of the clip, optionally selects a filter (old movie, hearts, rain falling etc) and a color filter. That's it, the rest is up to the ClipMaker, which is going to edit a videoclip with random cuts (and transitions in-between) from the uploaded video and with all the other settings set previously.
 
-```bash
-npm run dev
-# or
-yarn dev
-```
+## 💻 Techs
+[//]: # (Add the features of your project here:)
+- **Typescript** — A strongly typed programming language that builds on JavaScript
+- **NextJS** — React's framework
+- **ffmpeg-wasm** — A pure Webassembly / Javascript port of FFmpeg
+- **styled-components** — CSS-in-JS tool
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🛠 Getting started
+1. Clone this repo running on your terminal ```git clone https://github.com/Gust4voSales/ClipMaker.git``` 
+2. Inside the project folder run ```yarn``` to install all dependencies
+3. Then run ```yarn dev``` to run in development mode
 
-You can start editing the page by modifying `pages/index.tsx`. The page auto-updates as you edit the file.
-
-[API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.ts`.
-
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+## 🔗 Other links
+- [Figma design](https://www.figma.com/file/RoOkWt2Xg9n1pIxhrITiSn/ClipMaker?node-id=0%3A1)
+- [Trello workflow](https://trello.com/b/ecAtrdIg/clipmaker)
