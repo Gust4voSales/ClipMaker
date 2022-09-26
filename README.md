@@ -4,6 +4,7 @@ ClipMaker
 
 <p align="center">Website that automates videoclips editing with only a few clicks</p>
 👉Check it out: https://clip-maker.vercel.app/
+👉DEVLOG: https://youtu.be/GwiFs2uyXtg
 
 ## 📜 About
 The user uploads a video and an audio, sets the duration of the clip, optionally selects a filter (old movie, hearts, rain falling etc) and a color filter. That's it, the rest is up to the ClipMaker, which is going to edit a videoclip with random cuts (and transitions in-between) from the uploaded video and with all the other settings set previously.
