@@ -4,6 +4,7 @@ ClipMaker
 
 <p align="center">Website that automates videoclips editing with only a few clicks</p>
 👉Check it out: https://clip-maker.vercel.app/
+
 👉DEVLOG: https://youtu.be/GwiFs2uyXtg
 
 ## 📜 About
